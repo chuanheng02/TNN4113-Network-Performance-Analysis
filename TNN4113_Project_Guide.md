@@ -23,12 +23,12 @@
 
 > **Important for Ming Zin (S4):** The original report template says Ubuntu 22.04 / g++ 11.4 / Python 3.10. Your whole team is on **Ubuntu 24.04** with newer tools. You **must update Section 4.1 of the report** to match the table below — your terminal screenshots will expose the real versions and create a contradiction if left as 22.04.
 
-> **On ns-3 version:** The project brief does not mandate a specific ns-3 version. Your lab used **ns-3.43**. Either 3.43 or 3.47 (latest) will work fine for all three tasks — the P2P, CSMA, and Dumbbell APIs have been stable across both. **Pick one version and make sure all 4 members install the exact same one.** Whatever you install, declare it correctly in Section 4.1 of the report.
+> **ns-3 version:** Your group is using **ns-3.43** — this is what your lab already has and what all 4 members must install. Do not use any other version. Declare ns-3.43 in Section 4.1 of the report.
 
 | Item | Version / Value |
 |---|---|
 | Operating System | **Ubuntu 24.04 LTS** (VirtualBox) |
-| ns-3 release | **ns-3.43 or ns-3.47** — pick one, all must match |
+| ns-3 release | **ns-3.43** |
 | Compiler | **g++ 13.3.0** with C++17 |
 | Build system | CMake **3.28.3** via `./ns3` wrapper |
 | NetAnim version | bundled with whichever ns-3 version you download |
@@ -48,7 +48,7 @@
 2. [Recommended Timeline (5 Days)](#2-recommended-timeline-5-days)
 3. [Repository](#3-repository)
 4. [Phase 0 — System Setup (Day 1, Everyone)](#4-phase-0--system-setup-day-1-everyone)
-5. [Phase 1 — Install NS-3 (Day 1, Everyone)](#5-phase-1--install-ns-3-day-1-everyone)
+5. [Phase 1 — Install NS-3.43 (Day 1, Everyone)](#5-phase-1--install-ns-343-day-1-everyone)
 6. [Phase 2 — Verify Environment (Day 1, Everyone)](#6-phase-2--verify-environment-day-1-everyone)
 7. [Phase 3 — Install NetAnim (Day 1, Xavier mandatory)](#7-phase-3--install-netanim-day-1-xavier-mandatory)
 8. [Phase 4a — Task 1: Point-to-Point (Brendan)](#8-phase-4a--task-1-point-to-point-brendan)
@@ -197,36 +197,24 @@ gnuplot --version
 
 ---
 
-## 5. Phase 1 — Install NS-3 (Day 1, Everyone)
+## 5. Phase 1 — Install NS-3.43 (Day 1, Everyone)
 
-### 5.1 Decide on a version (do this as a group first)
+### 5.1 Download the NS-3.43 tarball
 
-Your lab used ns-3.43. The latest is ns-3.47. Pick one right now in your group chat and make sure everyone downloads the same one. This guide uses **ns-3.43** in the commands below — if you go with 3.47 just swap the version number everywhere.
-
-### 5.2 Download the tarball
-
-**ns-3.43:**
 ```bash
 cd ~
 wget https://www.nsnam.org/releases/ns-allinone-3.43.tar.bz2
 ```
 
-**ns-3.47 (latest):**
-```bash
-cd ~
-wget https://www.nsnam.org/releases/ns-allinone-3.47.tar.bz2
-```
-
-### 5.3 Extract and build
+### 5.2 Extract and build
 
 ```bash
-# Replace 3.43 with 3.47 if that's what you downloaded
 tar xjf ns-allinone-3.43.tar.bz2
 cd ns-allinone-3.43
 ./build.py --enable-examples --enable-tests
 ```
 
-This takes **15–40 minutes** depending on your machine. Do not interrupt it. Many compiler lines will scroll past — that is normal.
+This takes **15–40 minutes** depending on your VM resources. Do not interrupt it. Many compiler lines will scroll past — that is normal.
 
 When it finishes you will see:
 
@@ -237,18 +225,18 @@ Build finished successfully.
 Your NS-3 root directory is:
 
 ```
-~/ns-allinone-3.43/ns-3.43/    # or ns-allinone-3.47/ns-3.47/ if you used 3.47
+~/ns-allinone-3.43/ns-3.43/
 ```
 
 All simulation commands from this point are run from inside that directory.
 
-### 5.4 Alternative — Git clone (use only if tarball download fails)
+### 5.3 Alternative — Git clone (use only if tarball download fails)
 
 ```bash
 cd ~
 git clone https://gitlab.com/nsnam/ns-3-dev.git ns-3
 cd ns-3
-git checkout ns-3.43    # or ns-3.47
+git checkout ns-3.43
 ./ns3 configure --enable-examples --enable-tests
 ./ns3 build
 ```
@@ -262,11 +250,11 @@ All 4 members must run these checks and confirm outputs match before doing anyth
 ### 6.1 Check NS-3 version
 
 ```bash
-cd ~/ns-allinone-3.43/ns-3.43    # adjust if you used 3.47
+cd ~/ns-allinone-3.43/ns-3.43
 ./ns3 --version
 ```
 
-Expected (example for 3.43):
+Expected:
 ```
 ns-3.43
 ```
@@ -310,7 +298,7 @@ qmake NetAnim.pro
 make -j$(nproc)
 ```
 
-> The NetAnim folder name (e.g. `netanim-3.113`) depends on which ns-3 version you downloaded. Run `ls ~/ns-allinone-3.43/` to see the exact folder name after extraction.
+> The NetAnim folder inside `ns-allinone-3.43/` is named `netanim-3.113`. Run `ls ~/ns-allinone-3.43/` to confirm after extraction.
 
 A `NetAnim` executable will appear in that folder.
 
@@ -1306,7 +1294,7 @@ Abort with Ctrl+C and run that combination manually:
 ## Quick Command Reference
 
 ```bash
-# Everyone — verify NS-3 version
+# Everyone — verify NS-3.43
 cd ~/ns-allinone-3.43/ns-3.43 && ./ns3 --version
 
 # Brendan (S1) — single test run
