@@ -1,28 +1,44 @@
-# TNN4113 Computer Networks — Complete Project Execution Guide
+# TNN4113 Network Performance and Simulation — Complete Project Execution Guide
 
 **Project:** Network Performance Analysis Using NS-3 Simulator
 **Course:** TNN4113 Network Performance and Simulation
 **Submission Date:** 21 May 2026
+**Team Size:** 4 students
 **Group:** Group 16
 
 ---
 
-## ⚠️ Mandatory Environment Specification
+## Group Members
 
-This is taken **directly from your project report template (Section 4.1 — Methodology and Common Setup)**. Every member must match these versions exactly.
+| Student | Name | Matric ID | Task |
+|---|---|---|---|
+| S1 | Brendan Chan Kah Le | 83403 | Task 1 — Point-to-Point Link Analysis |
+| S2 | Xavier Liong Zhi Hao | 86079 | Task 2 — CSMA LAN Contention Study |
+| S3 | Ng Clarence Chuan Hann | 84832 | Task 3 — TCP Congestion Control (Dumbbell) |
+| S4 | Chong Ming Zin | 83489 | Task 4 — Synthesis & Report |
+
+---
+
+## ⚠️ Environment Specification (Your Actual Verified Setup)
+
+> **Important for Ming Zin (S4):** The original report template says Ubuntu 22.04 / g++ 11.4 / Python 3.10. Your whole team is on **Ubuntu 24.04** with newer tools. You **must update Section 4.1 of the report** to match the table below — your terminal screenshots will expose the real versions and create a contradiction if left as 22.04.
 
 | Item | Version / Value |
 |---|---|
-| Operating System | Ubuntu 22.04 LTS (under WSL2 / native Linux) |
+| Operating System | **Ubuntu 24.04 LTS** (WSL2 or native) |
 | ns-3 release | **ns-3.40** |
-| Compiler | g++ 11.4 with C++17 |
-| Build system | CMake via ./ns3 wrapper |
+| Compiler | **g++ 13.3.0** with C++17 |
+| Build system | CMake **3.28.3** via `./ns3` wrapper |
 | NetAnim version | **3.108** |
-| Plotting tool | gnuplot 5.4 / Python 3.10 + Matplotlib 3.7 |
-| Random-number seed | RngSeedManager::SetSeed(1) |
+| Python | **3.12.3** |
+| Qt / QMake | 5.15.13 |
+| Plotting | gnuplot **6.0** / Python 3.12 + Matplotlib |
+| Random-number seed | `RngSeedManager::SetSeed(1)` |
 | Run number | RngRun = 1 (varied 1–5 for repeatability checks) |
 
-> **Why 3.40 specifically?** The latest NS-3 version as of 2025 is 3.47, but your project brief explicitly specifies 3.40. All source code in this guide was written and tested for 3.40. Do not use any other version — using a different version risks API mismatches and will contradict what you declare in your submitted report.
+> **Why ns-3.40 specifically?** Your project brief explicitly specifies ns-3.40 in Section 4.1. The latest version as of 2025 is 3.47, but all source code in this guide is written and tested for 3.40. Do not use any other version.
+
+> **Note on g++ 13 + ns-3.40:** Newer compilers are stricter. If `./build.py` crashes with C++ internal errors, see [Troubleshooting Section 13](#13-troubleshooting) for the fix.
 
 ---
 
@@ -30,15 +46,15 @@ This is taken **directly from your project report template (Section 4.1 — Meth
 
 1. [Team Roles & Responsibilities](#1-team-roles--responsibilities)
 2. [Recommended Timeline (5 Days)](#2-recommended-timeline-5-days)
-3. [File Sharing — Google Drive (No Git Needed)](#3-file-sharing--google-drive-no-git-needed)
+3. [GitHub Repository Setup & Workflow](#3-github-repository-setup--workflow)
 4. [Phase 0 — System Setup (Day 1, Everyone)](#4-phase-0--system-setup-day-1-everyone)
 5. [Phase 1 — Install NS-3.40 (Day 1, Everyone)](#5-phase-1--install-ns-340-day-1-everyone)
 6. [Phase 2 — Verify Environment (Day 1, Everyone)](#6-phase-2--verify-environment-day-1-everyone)
-7. [Phase 3 — Install NetAnim 3.108 (Day 1, Student 2 mandatory)](#7-phase-3--install-netanim-3108-day-1-student-2-mandatory)
-8. [Phase 4a — Task 1: Point-to-Point (Student 1)](#8-phase-4a--task-1-point-to-point-student-1)
-9. [Phase 4b — Task 2: CSMA LAN (Student 2)](#9-phase-4b--task-2-csma-lan-student-2)
-10. [Phase 4c — Task 3: Dumbbell + TCP (Student 3)](#10-phase-4c--task-3-dumbbell--tcp-student-3)
-11. [Phase 5 — Report Assembly (Student 4)](#11-phase-5--report-assembly-student-4)
+7. [Phase 3 — Install NetAnim 3.108 (Day 1, Xavier mandatory)](#7-phase-3--install-netanim-3108-day-1-xavier-mandatory)
+8. [Phase 4a — Task 1: Point-to-Point (Brendan)](#8-phase-4a--task-1-point-to-point-brendan)
+9. [Phase 4b — Task 2: CSMA LAN (Xavier)](#9-phase-4b--task-2-csma-lan-xavier)
+10. [Phase 4c — Task 3: Dumbbell + TCP (Clarence)](#10-phase-4c--task-3-dumbbell--tcp-clarence)
+11. [Phase 5 — Report Assembly (Ming Zin)](#11-phase-5--report-assembly-ming-zin)
 12. [Phase 6 — Final Review & Submission](#12-phase-6--final-review--submission)
 13. [Troubleshooting](#13-troubleshooting)
 14. [Submission Checklist](#14-submission-checklist)
@@ -49,66 +65,242 @@ This is taken **directly from your project report template (Section 4.1 — Meth
 
 | Student | Role | Simulation File | Key Deliverables |
 |---|---|---|---|
-| **Student 1** | Task 1 — Point-to-Point | `task1_p2p.cc` | `task1_results.csv`, Tables 5.1 & 5.2, Figure 5.2, Screenshot 5.1, Section 5 |
-| **Student 2** | Task 2 — CSMA LAN | `task2_csma.cc` | `task2_csma.xml`, Tables 6.1 & 6.2, Figure 6.2, Screenshots 6.1 & 6.2, Section 6 |
-| **Student 3** | Task 3 — Dumbbell TCP | `task3_dumbbell.cc` | `cwnd-newreno.dat`, `cwnd-cubic.dat`, `cwnd_comparison.png`, Table 7.1, Screenshot 7.1, Section 7 |
-| **Student 4** | Task 4 — Synthesis & Report | None | Topology diagrams (Figs 5.1/6.1/7.1), Sections 1–4 & 8–12, final report merge, submission zip |
+| **Brendan** (S1) | Task 1 — Point-to-Point | `task1_p2p.cc` | `task1_results.csv`, Tables 5.1 & 5.2, Figure 5.2, Screenshot 5.1, Section 5 |
+| **Xavier** (S2) | Task 2 — CSMA LAN | `task2_csma.cc` | `task2_csma.xml`, Tables 6.1 & 6.2, Figure 6.2, Screenshots 6.1 & 6.2, Section 6 |
+| **Clarence** (S3) | Task 3 — Dumbbell TCP | `task3_dumbbell.cc` | `cwnd-newreno.dat`, `cwnd-cubic.dat`, `cwnd_comparison.png`, Table 7.1, Screenshot 7.1, Section 7 |
+| **Ming Zin** (S4) | Task 4 — Synthesis & Report | None | Topology diagrams (Figs 5.1/6.1/7.1), Sections 1–4 & 8–12, final report merge, submission zip |
 
-**Important:** Each student runs their own simulation **independently on their own laptop**. There is no shared simulation — you each have a different `.cc` file and generate different output files. Only at the end does Student 4 collect everyone's outputs and assemble the final package.
+**Important:** Each student runs their own simulation **independently on their own laptop**. There is no shared simulation — you each have a different `.cc` file and generate different output files. Only at the end does Ming Zin collect everyone's outputs and assemble the final package.
 
 ---
 
 ## 2. Recommended Timeline (5 Days)
 
-| Day | Date | Student 1 | Student 2 | Student 3 | Student 4 |
+| Day | Date | Brendan (S1) | Xavier (S2) | Clarence (S3) | Ming Zin (S4) |
 |---|---|---|---|---|---|
 | **Day 1 — Sat 17 May** | Install NS-3.40, get `task1_p2p.cc` compiling | Install NS-3.40 + NetAnim 3.108, get `task2_csma.cc` compiling | Install NS-3.40, get `task3_dumbbell.cc` compiling | Set up Google Drive folder, draft Sections 1–4, start topology diagrams |
 | **Day 2 — Sun 18 May** | Run 20-combo sweep, generate CSV + Figure 5.2 | Run 1/3/5 sender scenarios, open NetAnim, take screenshots | Run dumbbell, generate .dat files, plot cWnd | Continue Sections 1–4, draw Figures 5.1/6.1/7.1 in draw.io |
 | **Day 3 — Mon 19 May** | Fill Tables 5.1/5.2, write Section 5 analysis | Fill Tables 6.1/6.2, write Section 6 analysis | Fill Table 7.1, write Section 7 analysis | Draft Section 8 (Cross-Task Synthesis) |
-| **Day 4 — Tue 20 May** | Upload all files to Drive, review merged doc | Upload all files to Drive, review merged doc | Upload all files to Drive, review merged doc | Merge everyone's work into report, replace ALL `[INSERT]` placeholders, write Sections 9/10 |
+| **Day 4 — Tue 20 May** | Push branch, open PR on GitHub | Push branch, open PR on GitHub | Push branch, open PR on GitHub | Merge all 3 PRs, pull main, assemble report, replace ALL `[INSERT]` placeholders, write Sections 9/10 |
 | **Day 5 — Wed 21 May** | Final check of Section 5 in merged report | Final check of Section 6 in merged report | Final check of Section 7 in merged report | Export PDF, assemble zip, upload to eLeap before deadline |
 
 ---
 
-## 3. File Sharing — Google Drive (No Git Needed)
+## 3. GitHub Repository Setup & Workflow
 
-You do not need GitHub. Create one shared Google Drive folder and use this structure:
+### 3.1 Repository (already created by Clarence)
+
+The repo is live at:
 
 ```
-Group16_TNN4113/
+https://github.com/chuanheng02/TNN4113-Network-Performance-Analysis.git
+```
+
+Clarence needs to go to **Settings → Collaborators → Add people** and invite Brendan, Xavier, and Ming Zin by their GitHub usernames.
+
+### 3.2 Everyone clones the repo (Day 1)
+
+```bash
+# Set your identity first (do this once)
+git config --global user.name "Brendan Chan Kah Le"    # change to your own name
+git config --global user.email "your@email.com"
+
+# Clone
+git clone https://github.com/chuanheng02/TNN4113-Network-Performance-Analysis.git
+cd TNN4113-Network-Performance-Analysis
+```
+
+### 3.3 Repository folder structure
+
+Ming Zin creates this structure and pushes it on Day 1:
+
+```
+TNN4113-Network-Performance-Analysis/
+├── README.md
 ├── src/
-│   ├── task1_p2p.cc          ← Student 1 uploads here
-│   ├── task2_csma.cc          ← Student 2 uploads here
-│   └── task3_dumbbell.cc      ← Student 3 uploads here
+│   ├── task1_p2p.cc           ← Brendan
+│   ├── task2_csma.cc          ← Xavier
+│   └── task3_dumbbell.cc      ← Clarence
+├── scripts/
+│   ├── task1_sweep.sh         ← Brendan
+│   ├── plot_task1.py          ← Brendan
+│   ├── plot_task2.py          ← Xavier
+│   └── plot_cwnd.py           ← Clarence
 ├── results/
-│   ├── task1_results.csv      ← Student 1
-│   ├── task2_csma.xml         ← Student 2 (5-sender run)
-│   ├── cwnd-newreno.dat       ← Student 3
-│   ├── cwnd-cubic.dat         ← Student 3
-│   ├── figure_5_2.png         ← Student 1
-│   ├── figure_6_2.png         ← Student 2
-│   └── cwnd_comparison.png    ← Student 3
+│   ├── task1_results.csv      ← Brendan
+│   ├── task2_csma.xml         ← Xavier (5-sender run)
+│   ├── cwnd-newreno.dat       ← Clarence
+│   ├── cwnd-cubic.dat         ← Clarence
+│   ├── figure_5_2.png         ← Brendan
+│   ├── figure_6_2.png         ← Xavier
+│   └── cwnd_comparison.png    ← Clarence
 ├── screenshots/
-│   ├── 5.1_task1_run.png      ← Student 1
-│   ├── 6.1_netanim.png        ← Student 2
-│   ├── 6.2_task2_terminal.png ← Student 2
-│   └── 7.1_task3_run.png      ← Student 3
+│   ├── 5.1_task1_run.png      ← Brendan
+│   ├── 6.1_netanim.png        ← Xavier
+│   ├── 6.2_task2_terminal.png ← Xavier
+│   └── 7.1_task3_run.png      ← Clarence
 └── report/
-    └── TNN4113_Project_Report.docx  ← Student 4 owns this
+    ├── TNN4113_Project_Report.docx  ← Ming Zin
+    └── TNN4113_Project_Report.pdf   ← Ming Zin
 ```
 
-Student 4 creates the folder on Day 1 and shares it with all members. Each student uploads their files as they complete them — don't wait until Day 4.
+### 3.4 Branching strategy
+
+Each simulation student works on their own branch. Ming Zin works on `main`.
+
+```
+main                    ← Ming Zin's branch (report + merges)
+├── feat/task1-brendan  ← Brendan opens PR when done
+├── feat/task2-xavier   ← Xavier opens PR when done
+└── feat/task3-clarence ← Clarence opens PR when done
+```
+
+### 3.5 Each student's Git workflow
+
+**Brendan (S1):**
+```bash
+git checkout -b feat/task1-brendan
+
+cp ~/ns-allinone-3.40/ns-3.40/scratch/task1_p2p.cc     src/
+cp ~/ns-allinone-3.40/ns-3.40/task1_sweep.sh            scripts/
+cp ~/ns-allinone-3.40/ns-3.40/plot_task1.py             scripts/
+cp ~/ns-allinone-3.40/ns-3.40/task1_results.csv         results/
+cp ~/ns-allinone-3.40/ns-3.40/figure_5_2.png            results/
+cp ~/path/to/5.1_task1_run.png                          screenshots/
+
+git add .
+git commit -m "feat(task1): add P2P simulation, sweep script, and results
+
+- Add task1_p2p.cc (point-to-point topology, BulkSend/TCP NewReno)
+- Add task1_sweep.sh (20-combination delay x error rate sweep)
+- Add task1_results.csv (simulation output, 20 rows)
+- Add figure_5_2.png (throughput vs delay & error rate plot)
+- Add 5.1_task1_run.png (terminal screenshot)"
+
+git push origin feat/task1-brendan
+# Then open a Pull Request on GitHub: feat/task1-brendan → main
+```
+
+**Xavier (S2):**
+```bash
+git checkout -b feat/task2-xavier
+
+cp ~/ns-allinone-3.40/ns-3.40/scratch/task2_csma.cc     src/
+cp ~/ns-allinone-3.40/ns-3.40/task2_csma_5senders.xml   results/task2_csma.xml
+cp ~/ns-allinone-3.40/ns-3.40/task2_n*.log              results/
+cp ~/ns-allinone-3.40/ns-3.40/plot_task2.py             scripts/
+cp ~/ns-allinone-3.40/ns-3.40/figure_6_2.png            results/
+cp ~/path/to/6.1_netanim.png                            screenshots/
+cp ~/path/to/6.2_task2_terminal.png                     screenshots/
+
+git add .
+git commit -m "feat(task2): add CSMA LAN simulation, NetAnim trace, and results
+
+- Add task2_csma.cc (10-node CSMA, 1/3/5 sender scenarios)
+- Add task2_csma.xml (NetAnim trace, 5-sender run)
+- Add task2_n1/n3/n5.log (FlowMonitor output logs)
+- Add figure_6_2.png (aggregate throughput & PDR bar chart)
+- Add 6.1_netanim.png (NetAnim screenshot)
+- Add 6.2_task2_terminal.png (terminal FlowMonitor output)"
+
+git push origin feat/task2-xavier
+# Then open a Pull Request on GitHub: feat/task2-xavier → main
+```
+
+**Clarence (S3):**
+```bash
+git checkout -b feat/task3-clarence
+
+cp ~/ns-allinone-3.40/ns-3.40/scratch/task3_dumbbell.cc src/
+cp ~/ns-allinone-3.40/ns-3.40/cwnd-newreno.dat          results/
+cp ~/ns-allinone-3.40/ns-3.40/cwnd-cubic.dat            results/
+cp ~/ns-allinone-3.40/ns-3.40/cwnd_comparison.png       results/
+cp ~/ns-allinone-3.40/ns-3.40/plot_cwnd.py              scripts/
+cp ~/path/to/7.1_task3_run.png                          screenshots/
+
+git add .
+git commit -m "feat(task3): add dumbbell simulation, cWnd traces, and analysis
+
+- Add task3_dumbbell.cc (dumbbell topology, NewReno vs Cubic)
+- Add cwnd-newreno.dat (NewReno congestion window time-series)
+- Add cwnd-cubic.dat (Cubic congestion window time-series)
+- Add cwnd_comparison.png (cWnd evolution plot, 30s)
+- Add 7.1_task3_run.png (terminal screenshot)"
+
+git push origin feat/task3-clarence
+# Then open a Pull Request on GitHub: feat/task3-clarence → main
+```
+
+### 3.6 Ming Zin merges all PRs (Day 4)
+
+1. Go to GitHub → Pull Requests
+2. Review and merge `feat/task1-brendan` → `main`
+3. Review and merge `feat/task2-xavier` → `main`
+4. Review and merge `feat/task3-clarence` → `main`
+5. Pull the merged main locally:
+
+```bash
+git checkout main
+git pull
+```
+
+Then add the final report:
+
+```bash
+cp ~/path/to/TNN4113_Project_Report.docx  report/
+cp ~/path/to/TNN4113_Project_Report.pdf   report/
+
+git add .
+git commit -m "docs(report): final merged report with all results and diagrams
+
+- Update Section 4.1 environment table to Ubuntu 24.04 / g++ 13.3.0
+- Insert topology diagrams Figures 5.1, 6.1, 7.1
+- Fill all [INSERT] cells in Tables 5.1, 5.2, 6.1, 6.2, 7.1
+- Replace all screenshot and figure placeholders
+- Write Section 8 cross-task synthesis
+- Write Sections 9 and 10 (conclusions, peer evaluation)
+- Export TNN4113_Project_Report.pdf"
+
+git push origin main
+```
+
+Final submission commit after zipping:
+
+```bash
+git commit -m "chore(submission): assemble Group16_TNN4113_Submission.zip
+
+- Collect source code, trace outputs, plots, screenshots
+- Final proofread complete, zero [INSERT] remaining
+- Zip ready for eLeap upload"
+
+git push origin main
+```
+
+### 3.7 GitHub authentication tip
+
+If Git asks for a password, GitHub no longer accepts account passwords — use a **Personal Access Token**:
+
+1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token
+2. Scope: tick `repo`
+3. Copy the token and paste it as your password when prompted
+
+Or set up SSH keys (more permanent):
+```bash
+ssh-keygen -t ed25519 -C "your@email.com"
+cat ~/.ssh/id_ed25519.pub   # copy this output
+# Paste into: GitHub → Settings → SSH and GPG keys → New SSH key
+```
 
 ---
 
 ## 4. Phase 0 — System Setup (Day 1, Everyone)
 
-### 4.1 If you are on Windows — Install WSL2 + Ubuntu 22.04
+### 4.1 If you are on Windows — Install WSL2 + Ubuntu 24.04
 
 Open **PowerShell as Administrator:**
 
 ```powershell
-wsl --install -d Ubuntu-22.04
+wsl --install -d Ubuntu-24.04
 ```
 
 Reboot when prompted. Open Ubuntu from the Start menu, create a UNIX username and password. Then update WSL:
@@ -117,7 +309,7 @@ Reboot when prompted. Open Ubuntu from the Start menu, create a UNIX username an
 wsl --update
 ```
 
-### 4.2 If you are on native Ubuntu 22.04 — Skip to 4.3
+### 4.2 If you are on native Ubuntu 24.04 — Skip to 4.3
 
 ### 4.3 Update your system
 
@@ -127,37 +319,46 @@ sudo apt update && sudo apt upgrade -y
 
 ### 4.4 Install all required packages
 
-The following command has been corrected from the original — `sqlite` (which does not exist as a standalone package on Ubuntu 22.04) has been removed, and `libgcrypt-dev` has been replaced with `libgcrypt20-dev` which is the correct package name on this OS version:
+> **This command is updated for Ubuntu 24.04.** Key changes from the old 22.04 command:
+> - `qtchooser` removed — dropped from Ubuntu 24.04
+> - `python3-full` added — required for Python environment management on 24.04
+> - `python3-matplotlib` and `python3-numpy` installed via apt instead of pip — avoids the "externally managed environment" error on 24.04
+> - `libgcrypt20-dev` used directly (not `libgcrypt-dev`)
+> - `sqlite` removed — does not exist as a standalone package; `sqlite3` and `libsqlite3-dev` are sufficient
 
 ```bash
 sudo apt install -y \
   build-essential cmake ninja-build pkg-config \
   g++ gdb gcc-multilib g++-multilib \
-  python3 python3-dev python3-pip python3-setuptools \
-  git mercurial \
-  qtbase5-dev qttools5-dev qttools5-dev-tools qtchooser qt5-qmake \
+  python3 python3-dev python3-full python3-setuptools \
+  git \
+  qtbase5-dev qttools5-dev qttools5-dev-tools qt5-qmake \
   mpi-default-bin mpi-default-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev \
   autoconf automake libxml2 libxml2-dev libgcrypt20-dev libgsl-dev \
   flex bison libfl-dev tcpdump sqlite3 libsqlite3-dev \
-  libgtk-3-dev gnuplot wget tar bzip2 unzip
-```
-
-> **Note on sqlite:** `sqlite3` and `libsqlite3-dev` are included above and are sufficient. The standalone `sqlite` package does not exist on Ubuntu 22.04 — ignore any guides that list it. NS-3 does not require it for any of your three tasks.
-
-Then install Python plotting libraries:
-
-```bash
-sudo apt install python3-matplotlib python3-numpy -y
+  libgtk-3-dev gnuplot wget tar bzip2 unzip \
+  python3-matplotlib python3-numpy
 ```
 
 ### 4.5 Verify toolchain
 
+Run each command and confirm the output matches:
+
 ```bash
-g++ --version        # must show 11.x
-python3 --version    # must show 3.10.x
-cmake --version      # must show 3.22 or newer
-qmake --version      # must show Qt 5.15.x
-gnuplot --version    # must show 5.4
+g++ --version
+# Expected: g++ (Ubuntu 13.3.0-...) 13.3.0
+
+python3 --version
+# Expected: Python 3.12.3
+
+cmake --version
+# Expected: cmake version 3.28.3
+
+qmake --version
+# Expected: QMake version 3.1 / Using Qt version 5.15.13
+
+gnuplot --version
+# Expected: gnuplot 6.0 patchlevel 0
 ```
 
 ---
@@ -171,7 +372,7 @@ cd ~
 wget https://www.nsnam.org/releases/ns-allinone-3.40.tar.bz2
 ```
 
-> This is the only correct download URL for NS-3.40. Do not download any other version. As of 2025 the latest NS-3 version is 3.47, but your project report explicitly specifies **ns-3.40** in Section 4.1 and the source code in this guide is written for 3.40.
+> This is the only correct download URL for NS-3.40. As of 2025 the latest NS-3 version is 3.47, but your project report explicitly specifies **ns-3.40** in Section 4.1 and all source code in this guide is written for 3.40.
 
 ### 5.2 Extract and build
 
@@ -181,7 +382,7 @@ cd ns-allinone-3.40
 ./build.py --enable-examples --enable-tests
 ```
 
-This takes **15–40 minutes** depending on your machine. Do not interrupt it. You will see many compiler lines scroll past — that is normal.
+This takes **15–40 minutes** depending on your machine. Do not interrupt it. Many compiler lines will scroll past — that is normal.
 
 When it finishes you will see:
 
@@ -212,7 +413,7 @@ git checkout ns-3.40
 
 ## 6. Phase 2 — Verify Environment (Day 1, Everyone)
 
-All 4 members must run these checks and confirm the outputs match before doing anything else. This ensures you are all on identical environments as required by Section 4.1 of the report.
+All 4 members must run these checks and confirm outputs match before doing anything else.
 
 ### 6.1 Check NS-3 version
 
@@ -221,7 +422,7 @@ cd ~/ns-allinone-3.40/ns-3.40
 ./ns3 --version
 ```
 
-Expected output:
+Expected:
 ```
 ns-3.40
 ```
@@ -232,7 +433,7 @@ ns-3.40
 ./ns3 run hello-simulator
 ```
 
-Expected output:
+Expected:
 ```
 Hello Simulator
 ```
@@ -243,15 +444,15 @@ Hello Simulator
 ./ns3 run first
 ```
 
-You should see TCP packet-exchange log lines. If this works, your NS-3 installation is fully functional.
+You should see TCP packet-exchange log lines. If this works, NS-3 is fully functional.
 
-### 6.4 Environment verification summary
+### 6.4 Share confirmation in group chat
 
-Screenshot your terminal showing all three outputs above and share in your group chat. Once all 4 members have confirmed matching outputs, you are ready to proceed.
+Screenshot your terminal showing all three outputs above and share in the group chat (WhatsApp/Telegram). Once all 4 members confirm, proceed.
 
 ---
 
-## 7. Phase 3 — Install NetAnim 3.108 (Day 1, Student 2 mandatory)
+## 7. Phase 3 — Install NetAnim 3.108 (Day 1, Xavier mandatory)
 
 NetAnim is bundled inside the ns-allinone tarball. You only need to compile it.
 
@@ -293,11 +494,11 @@ echo 'export PATH="$HOME/ns-allinone-3.40/netanim-3.108:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-Now you can just type `NetAnim` from anywhere.
+Now you can type `NetAnim` from anywhere.
 
 ---
 
-## 8. Phase 4a — Task 1: Point-to-Point (Student 1)
+## 8. Phase 4a — Task 1: Point-to-Point (Brendan)
 
 **Goal:** Measure how channel delay and packet error rate degrade TCP throughput on a single P2P link.
 
@@ -314,8 +515,9 @@ Paste the complete source code below:
 
 ```cpp
 /*
- * TNN4113 - Task 1
+ * TNN4113 Group 16 - Task 1
  * Point-to-Point Network: Link Characteristic & Reliability Analysis
+ * Student: Brendan Chan Kah Le (83403)
  *
  * Topology:  Node 0  <-- 5 Mbps, variable delay, variable error -->  Node 1
  *            (BulkSendApplication / TCP source)         (PacketSink / TCP sink)
@@ -428,18 +630,16 @@ cd ~/ns-allinone-3.40/ns-3.40
 ./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.00"
 ```
 
-You should see one output line like:
+Expected output:
 ```
 Flow 1  Throughput=4.XX Mbps  MeanDelay=XX ms  Lost=0  TxPackets=N  RxPackets=N
 ```
 
 ### 8.3 Take Screenshot 5.1
 
-Take a screenshot of your terminal showing the `./ns3 build` success and the `Flow 1 Throughput=...` output line. Save as `5.1_task1_run.png`.
+Screenshot your terminal showing the `./ns3 build` success and the `Flow 1 Throughput=...` output line. Save as `5.1_task1_run.png`.
 
 ### 8.4 Run the 20-combination sweep
-
-Create the sweep script in the NS-3 root:
 
 ```bash
 cd ~/ns-allinone-3.40/ns-3.40
@@ -451,6 +651,7 @@ Paste:
 ```bash
 #!/bin/bash
 # task1_sweep.sh — run all 20 (delay, error-rate) combinations
+# TNN4113 Group 16 — Brendan Chan Kah Le (83403)
 
 set -e
 OUT="task1_results.csv"
@@ -501,7 +702,9 @@ Create `plot_task1.py`:
 
 ```python
 #!/usr/bin/env python3
-"""plot_task1.py — Figure 5.2: TCP throughput vs channel delay and error rate."""
+"""plot_task1.py — Figure 5.2: TCP throughput vs channel delay and error rate.
+TNN4113 Group 16 — Brendan Chan Kah Le (83403)
+"""
 import csv
 import matplotlib.pyplot as plt
 from collections import defaultdict
@@ -544,13 +747,23 @@ Open `task1_results.csv`. Pick rows to populate:
 **Table 5.1** — filter where `errRate = 0.00`, use all 5 delay values
 **Table 5.2** — filter where `delay_ms = 10`, use all 4 error rate values
 
-### 8.7 Upload to Google Drive
+### 8.7 Push to GitHub
 
-Upload to `Group4_TNN4113/src/`, `results/`, and `screenshots/` folders.
+When all files are ready, commit and push your branch (see Section 3.5 for full commands):
+
+```bash
+cd ~/TNN4113-Network-Performance-Analysis
+git checkout feat/task1-brendan
+git add .
+git commit -m "feat(task1): add P2P simulation, sweep script, and results ..."
+git push origin feat/task1-brendan
+```
+
+Then open a **Pull Request** on GitHub: `feat/task1-brendan` → `main`.
 
 ---
 
-## 9. Phase 4b — Task 2: CSMA LAN (Student 2)
+## 9. Phase 4b — Task 2: CSMA LAN (Xavier)
 
 **Goal:** Measure how throughput and PDR degrade as more UDP senders contend on a shared 10-node CSMA LAN.
 
@@ -567,8 +780,9 @@ Paste:
 
 ```cpp
 /*
- * TNN4113 - Task 2
+ * TNN4113 Group 16 - Task 2
  * 10-node CSMA LAN: Shared-Medium Contention Study
+ * Student: Xavier Liong Zhi Hao (86079)
  *
  * Topology:  10 nodes (N0..N9) on one CSMA channel
  *            N0 = sink (PacketSink / UDP)
@@ -724,13 +938,16 @@ Fill in your real numbers from the log files, then run:
 
 ```python
 #!/usr/bin/env python3
+"""plot_task2.py — Figure 6.2: CSMA aggregate throughput and PDR.
+TNN4113 Group 16 — Xavier Liong Zhi Hao (86079)
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Replace with your real values from task2_n1/n3/n5.log
+# Replace these with your real values from task2_n1/n3/n5.log
 senders  = [1, 3, 5]
-agg_thr  = [4.99, 14.85, 24.00]   # REPLACE with real aggregate throughput
-mean_pdr = [100.0, 99.0, 96.0]    # REPLACE with real mean PDR
+agg_thr  = [4.99, 14.85, 24.00]   # REPLACE with real AGGREGATE lines
+mean_pdr = [100.0, 99.0, 96.0]    # REPLACE with real mean PDR per scenario
 
 fig, ax1 = plt.subplots(figsize=(8, 5))
 x = np.arange(len(senders))
@@ -755,13 +972,21 @@ plt.savefig('figure_6_2.png', dpi=150)
 print('Saved figure_6_2.png')
 ```
 
-### 9.7 Upload to Google Drive
+### 9.7 Push to GitHub
 
-Upload all files to their respective folders.
+```bash
+cd ~/TNN4113-Network-Performance-Analysis
+git checkout feat/task2-xavier
+git add .
+git commit -m "feat(task2): add CSMA LAN simulation, NetAnim trace, and results ..."
+git push origin feat/task2-xavier
+```
+
+Then open a **Pull Request** on GitHub: `feat/task2-xavier` → `main`.
 
 ---
 
-## 10. Phase 4c — Task 3: Dumbbell + TCP (Student 3)
+## 10. Phase 4c — Task 3: Dumbbell + TCP (Clarence)
 
 **Goal:** Compare TCP NewReno vs TCP Cubic congestion-window behaviour over a shared 1 Mbps bottleneck.
 
@@ -778,8 +1003,9 @@ Paste:
 
 ```cpp
 /*
- * TNN4113 - Task 3
+ * TNN4113 Group 16 - Task 3
  * Dumbbell Topology: TCP NewReno vs TCP Cubic over a 1 Mbps Bottleneck
+ * Student: Ng Clarence Chuan Hann (84832)
  *
  *      L0 ----\                                        /---- R0
  *              left-router --- 1Mbps/20ms --- right-router
@@ -929,6 +1155,9 @@ Screenshot your terminal showing the `./ns3 run` completion message and the `ls 
 
 ```python
 #!/usr/bin/env python3
+"""plot_cwnd.py — Figure 7.2: cWnd Evolution NewReno vs Cubic.
+TNN4113 Group 16 — Ng Clarence Chuan Hann (84832)
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -977,7 +1206,7 @@ for label, fn in [('NewReno', 'cwnd-newreno.dat'), ('Cubic', 'cwnd-cubic.dat')]:
     t, cwnd = d[:, 0], d[:, 1]
     drops = []
     for i in range(1, len(cwnd)):
-        if cwnd[i] < cwnd[i-1] * 0.95:     # >5% sudden drop = congestion event
+        if cwnd[i] < cwnd[i-1] * 0.95:
             w_max  = cwnd[i-1]
             w_min  = cwnd[i]
             t_drop = t[i]
@@ -1004,15 +1233,27 @@ Look at your `cwnd_comparison.png` and verify:
 - Cubic reaches higher cWnd values between drops ✓
 - Cubic's recovery time in Table 7.1 is shorter than NewReno's ✓
 
-If both curves look identical — the per-node TCP variant assignment silently failed. Re-read the `Config::Set` lines in the source and confirm the node IDs are correct.
+If both curves look identical — the per-node TCP variant assignment silently failed. Print the node IDs to debug:
+```cpp
+std::cout << "Left 0 ID = " << db.GetLeft(0)->GetId() << "\n";
+std::cout << "Left 1 ID = " << db.GetLeft(1)->GetId() << "\n";
+```
 
-### 10.7 Upload to Google Drive
+### 10.7 Push to GitHub
 
-Upload all files to their respective folders.
+```bash
+cd ~/TNN4113-Network-Performance-Analysis
+git checkout feat/task3-clarence
+git add .
+git commit -m "feat(task3): add dumbbell simulation, cWnd traces, and analysis ..."
+git push origin feat/task3-clarence
+```
+
+Then open a **Pull Request** on GitHub: `feat/task3-clarence` → `main`.
 
 ---
 
-## 11. Phase 5 — Report Assembly (Student 4)
+## 11. Phase 5 — Report Assembly (Ming Zin)
 
 You do not run any simulation. Your job is to produce the final, complete, submission-ready report.
 
@@ -1021,9 +1262,9 @@ You do not run any simulation. Your job is to produce the final, complete, submi
 Draft these sections — they do not require any simulation data:
 
 - **Section 1** — Executive Summary (leave result sentences as placeholders for now)
-- **Section 2** — Introduction (already written in template, fill names)
+- **Section 2** — Introduction (already written in template, fill names and group number)
 - **Section 3** — Background and Theoretical Framework (already complete in template)
-- **Section 4** — Methodology (fill the environment table using the spec at the top of this guide)
+- **Section 4** — Methodology — **update the environment table to Ubuntu 24.04 / g++ 13.3.0 / Python 3.12.3 / gnuplot 6.0** as shown at the top of this guide
 
 ### 11.2 Draw the 3 topology diagrams
 
@@ -1049,16 +1290,21 @@ Export each as PNG and insert into the report.
 
 ### 11.3 Day 4 — Collect and merge
 
-Once all 3 teammates have uploaded to Google Drive:
+Once all 3 teammates have opened their Pull Requests:
 
-1. Download all files from the Drive folder
-2. Open `TNN4113_Project_Report.docx`
+1. Merge each PR on GitHub (Section 3.6)
+2. Pull the updated main locally:
+```bash
+git checkout main
+git pull
+```
+3. Open `TNN4113_Project_Report.docx`
 3. Replace every `[INSERT]` and `>>> PLACEHOLDER <<<` using this checklist:
 
 | Find | Replace with |
 |---|---|
-| `[INSERT NAME]` × 8 | Real student names |
-| `[INSERT ID]` × 4 | Real matric IDs |
+| `[INSERT NAME]` × 8 | Brendan, Xavier, Clarence, Ming Zin (real full names) |
+| `[INSERT ID]` × 4 | 83403, 86079, 84832, 83489 |
 | `>>> PLACEHOLDER: INSERT FIGURE 5.1 <<<` | Figure 5.1 PNG |
 | `>>> PLACEHOLDER: INSERT SCREENSHOT 5.1 <<<` | `5.1_task1_run.png` |
 | `>>> PLACEHOLDER: INSERT FIGURE 5.2 <<<` | `figure_5_2.png` |
@@ -1071,20 +1317,20 @@ Once all 3 teammates have uploaded to Google Drive:
 | `>>> PLACEHOLDER: INSERT SCREENSHOT 7.1 <<<` | `7.1_task3_run.png` |
 | All `[INSERT]` cells in Tables 5.1, 5.2, 6.1, 6.2, 7.1 | Real numbers from CSV / logs |
 
-Use Word's **Find & Replace (Ctrl+H)** and search for `[INSERT` — it must return zero results when you are done.
+Use Word's **Find & Replace (Ctrl+H)** — search for `[INSERT` — must return zero results when done.
 
 ### 11.4 Write Section 8 (Cross-Task Synthesis)
 
-Verify the three-layer summary table matches your real results:
-- Task 1 row: "Throughput ∝ 1/RTT and ≈1/√p" — confirmed by Tables 5.1/5.2?
-- Task 2 row: "PDR drops with each new sender" — confirmed by Table 6.1?
-- Task 3 row: "Cubic more aggressive, recovers faster" — confirmed by Table 7.1?
+Verify the three-layer summary table matches the real results:
+- Task 1: "Throughput ∝ 1/RTT and ≈1/√p" — confirmed by Tables 5.1/5.2?
+- Task 2: "PDR drops with each new sender" — confirmed by Table 6.1?
+- Task 3: "Cubic more aggressive, recovers faster" — confirmed by Table 7.1?
 
 Update any text that contradicts the real numbers.
 
 ### 11.5 Fill Peer Evaluation (Section 10)
 
-Fill in real names and adjust contribution percentages if the workload was uneven. Everyone signs.
+Fill in real names and matric IDs. Adjust contribution percentages if the workload was uneven. Everyone signs.
 
 ### 11.6 Assemble submission package
 
@@ -1104,7 +1350,7 @@ cp TNN4113_Project_Report.docx                    ~/Group16_Submission/
 cp TNN4113_Project_Report.pdf                     ~/Group16_Submission/
 
 cd ~
-zip -r Group16_TNN4113_Submission.zip Group4_Submission/
+zip -r Group16_TNN4113_Submission.zip Group16_Submission/
 ```
 
 ---
@@ -1114,16 +1360,16 @@ zip -r Group16_TNN4113_Submission.zip Group4_Submission/
 ### 12.1 Group review meeting (Day 5 morning)
 
 Video call, screen-share the PDF:
-- Student 1 reads Sections 6, 7, 8
-- Student 2 reads Sections 5, 7, 8
-- Student 3 reads Sections 5, 6, 8
-- Student 4 moderates and applies fixes live
+- Brendan reads Sections 6, 7, 8
+- Xavier reads Sections 5, 7, 8
+- Clarence reads Sections 5, 6, 8
+- Ming Zin moderates and applies fixes live
 
 ### 12.2 Upload to eLeap
 
 1. Log in to eLeap
 2. Navigate to TNN4113 project submission
-3. Upload `Group4_TNN4113_Submission.zip`
+3. Upload `Group16_TNN4113_Submission.zip`
 4. Confirm upload success
 5. Screenshot the confirmation page
 
@@ -1134,10 +1380,30 @@ Video call, screen-share the PDF:
 ## 13. Troubleshooting
 
 **`E: Unable to locate package sqlite`**
-Remove `sqlite` from the apt command. Use `sqlite3` and `libsqlite3-dev` instead — both are already in the corrected command in Section 4.4.
+Remove `sqlite` from the apt command. `sqlite3` and `libsqlite3-dev` are sufficient — both are already in the Section 4.4 command.
 
-**`Note, selecting 'libgcrypt20-dev' instead of 'libgcrypt-dev'`**
-This is not an error. Ubuntu 22.04 renamed the package. The corrected command in Section 4.4 uses `libgcrypt20-dev` directly.
+**`E: Package 'qtchooser' has no installation candidate`**
+`qtchooser` was dropped from Ubuntu 24.04. Remove it from the apt command — it is already absent from the Section 4.4 command.
+
+**`error: externally-managed-environment` when using pip3**
+Ubuntu 24.04 blocks pip installs into the system Python. Use apt instead:
+```bash
+sudo apt install python3-matplotlib python3-numpy -y
+```
+This is already how Section 4.4 installs them.
+
+**NS-3.40 build fails with C++ errors inside NS-3 source files**
+g++ 13 is stricter than g++ 11. Apply this patch before building:
+```bash
+cd ~/ns-allinone-3.40/ns-3.40
+find . -name "*.cc" -o -name ".h" | xargs grep -l "uint8_t\|uint32_t" | head -5
+```
+If the build fails on a specific file, the most common fix is:
+```bash
+./ns3 configure --enable-examples --enable-tests \
+  --CXX_FLAGS="-Wno-error=deprecated-declarations -Wno-error=unused-variable"
+./ns3 build
+```
 
 **`./ns3 run hello-simulator` gives an error**
 Re-run configure:
@@ -1148,24 +1414,23 @@ Re-run configure:
 ```
 
 **`cwnd-newreno.dat` is empty after Task 3 run**
-The tracer hook fires after socket creation. Push the schedule to `Seconds(1.5)`:
+Push the schedule to `Seconds(1.5)`:
 ```cpp
 Simulator::Schedule(Seconds(1.5), [&]() { ... });
 ```
 
 **NetAnim window does not open on WSL2**
-Run `wsl --update` in PowerShell, then reopen Ubuntu and try again.
+Run `wsl --update` in PowerShell, reopen Ubuntu and try again.
 
 **Both cWnd curves in Task 3 look identical**
-The `Config::Set` per-node TCP variant assignment failed silently. Print the node IDs to confirm:
+Print node IDs to confirm the Config::Set assignments are correct:
 ```cpp
 std::cout << "Left 0 ID = " << db.GetLeft(0)->GetId() << "\n";
 std::cout << "Left 1 ID = " << db.GetLeft(1)->GetId() << "\n";
 ```
-Then verify those IDs match what you pass to `Config::Set`.
 
 **Task 1 sweep script hangs on one combination**
-Abort with Ctrl+C, run that single combination manually to see the error message:
+Abort with Ctrl+C and run that combination manually:
 ```bash
 ./ns3 run "scratch/task1_p2p --delay=60ms --errRate=0.05"
 ```
@@ -1178,7 +1443,7 @@ Abort with Ctrl+C, run that single combination manually to see the error message
 - [ ] `task1_p2p.cc` — compiles on NS-3.40, runs cleanly
 - [ ] `task2_csma.cc` — compiles on NS-3.40, runs cleanly
 - [ ] `task3_dumbbell.cc` — compiles on NS-3.40, runs cleanly
-- [ ] All files have header comment with task number and student name
+- [ ] All 3 files have header comment with group number, task, and student name
 
 ### Data outputs
 - [ ] `task1_results.csv` — 20 rows of real simulation data
@@ -1186,7 +1451,7 @@ Abort with Ctrl+C, run that single combination manually to see the error message
 - [ ] `cwnd-newreno.dat` — non-empty, two columns
 - [ ] `cwnd-cubic.dat` — non-empty, two columns
 
-### Plots (generated, not screenshots)
+### Plots (generated output, not screenshots)
 - [ ] `figure_5_2.png` — Throughput vs Delay & Error Rate, 4 curves
 - [ ] `figure_6_2.png` — CSMA aggregate throughput & PDR bar chart
 - [ ] `cwnd_comparison.png` — NewReno vs Cubic cWnd over 30 s
@@ -1203,15 +1468,16 @@ Abort with Ctrl+C, run that single combination manually to see the error message
 - [ ] Figure 7.1 — Dumbbell topology
 
 ### Report
-- [ ] Environment table (Section 4.1) filled with exact spec from this guide
+- [ ] Section 4.1 environment table updated to Ubuntu 24.04 / g++ 13.3.0 / Python 3.12.3 / gnuplot 6.0
+- [ ] All 4 names + matric IDs filled — Brendan (83403), Xavier (86079), Clarence (84832), Ming Zin (83489)
 - [ ] Zero remaining `[INSERT]` cells in any table
 - [ ] Zero remaining `>>> PLACEHOLDER <<<` blocks
-- [ ] All 4 names + matric IDs on cover page and Declaration
 - [ ] Peer Evaluation signed by all 4 members
 - [ ] PDF exported
 
 ### Submission
-- [ ] ZIP uploaded to eLeap before 21 May 2026 deadline
+- [ ] ZIP named `Group16_TNN4113_Submission.zip`
+- [ ] Uploaded to eLeap before 21 May 2026 deadline
 - [ ] Confirmation screenshot saved
 - [ ] All members have a personal backup copy
 
@@ -1223,23 +1489,38 @@ Abort with Ctrl+C, run that single combination manually to see the error message
 # Everyone — verify NS-3.40
 cd ~/ns-allinone-3.40/ns-3.40 && ./ns3 --version
 
-# Student 1 — single test run
+# Everyone — clone repo (Day 1)
+git clone https://github.com/chuanheng02/TNN4113-Network-Performance-Analysis.git
+
+# Brendan (S1) — create branch
+git checkout -b feat/task1-brendan
+
+# Brendan (S1) — single test run
 ./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.00"
 
-# Student 1 — full 20-combo sweep
+# Brendan (S1) — full 20-combo sweep
 ./task1_sweep.sh
 
-# Student 2 — all three CSMA scenarios
+# Xavier (S2) — create branch
+git checkout -b feat/task2-xavier
+
+# Xavier (S2) — all three CSMA scenarios
 for n in 1 3 5; do
   ./ns3 run "scratch/task2_csma --nSenders=$n" | tee task2_n${n}.log
 done
 
-# Student 2 — open NetAnim
+# Xavier (S2) — open NetAnim
 NetAnim
 
-# Student 3 — run dumbbell + plot
+# Clarence (S3) — create branch
+git checkout -b feat/task3-clarence
+
+# Clarence (S3) — run dumbbell + plot
 ./ns3 run scratch/task3_dumbbell && python3 plot_cwnd.py
 
-# Student 4 — assemble zip
-cd ~ && zip -r Group4_TNN4113_Submission.zip Group4_Submission/
+# Ming Zin (S4) — merge all PRs then pull
+git checkout main && git pull
+
+# Ming Zin (S4) — assemble zip
+cd ~ && zip -r Group16_TNN4113_Submission.zip Group16_Submission/
 ```
