@@ -1,10 +1,9 @@
 # TNN4113 Computer Networks — Complete Project Execution Guide
 
 **Project:** Network Performance Analysis Using NS-3 Simulator
-**Course:** TNN4113 Computer Networks
+**Course:** TNN4113 Network Performance and Simulation
 **Submission Date:** 21 May 2026
-**Team Size:** 4 students
-**Group:** Group 4
+**Group:** Group 16
 
 ---
 
