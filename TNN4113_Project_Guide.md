@@ -88,8 +88,8 @@ sudo apt install -y \
   git mercurial \
   qtbase5-dev qttools5-dev qttools5-dev-tools qtchooser qt5-qmake \
   mpi-default-bin mpi-default-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev \
-  autoconf automake libxml2 libxml2-dev libgcrypt-dev libgsl-dev \
-  flex bison libfl-dev tcpdump sqlite sqlite3 libsqlite3-dev \
+  autoconf automake libxml2 libxml2-dev libgcrypt20-dev libgsl-dev \
+  flex bison libfl-dev tcpdump sqlite3 libsqlite3-dev \
   libgtk-3-dev gnuplot wget tar bzip2 unzip
 ```
 
