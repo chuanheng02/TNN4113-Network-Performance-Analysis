@@ -1,4 +1,4 @@
-# TNN4113 Computer Networks — Group 4
+# TNN4113 Network Performance and Simulation Project  — Group 16
 
 ## Network Performance Analysis Using the NS-3 Simulator
 
