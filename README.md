@@ -245,7 +245,7 @@ cp report/TNN4113_Project_Report.docx   ~/Group16_Submission/
 cp report/TNN4113_Project_Report.pdf    ~/Group16_Submission/
 
 cd ~
-zip -r Group4_TNN4113_Submission.zip Group16_Submission/
+zip -r Group16_TNN4113_Submission.zip Group16_Submission/
 ```
 
 Upload `Group16_TNN4113_Submission.zip` to eLeap before **21 May 2026**.
