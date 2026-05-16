@@ -23,22 +23,22 @@
 
 > **Important for Ming Zin (S4):** The original report template says Ubuntu 22.04 / g++ 11.4 / Python 3.10. Your whole team is on **Ubuntu 24.04** with newer tools. You **must update Section 4.1 of the report** to match the table below — your terminal screenshots will expose the real versions and create a contradiction if left as 22.04.
 
+> **On ns-3 version:** The project brief does not mandate a specific ns-3 version. Your lab used **ns-3.43**. Either 3.43 or 3.47 (latest) will work fine for all three tasks — the P2P, CSMA, and Dumbbell APIs have been stable across both. **Pick one version and make sure all 4 members install the exact same one.** Whatever you install, declare it correctly in Section 4.1 of the report.
+
 | Item | Version / Value |
 |---|---|
 | Operating System | **Ubuntu 24.04 LTS** (WSL2 or native) |
-| ns-3 release | **ns-3.40** |
+| ns-3 release | **ns-3.43 or ns-3.47** — pick one, all must match |
 | Compiler | **g++ 13.3.0** with C++17 |
 | Build system | CMake **3.28.3** via `./ns3` wrapper |
-| NetAnim version | **3.108** |
+| NetAnim version | bundled with whichever ns-3 version you download |
 | Python | **3.12.3** |
 | Qt / QMake | 5.15.13 |
 | Plotting | gnuplot **6.0** / Python 3.12 + Matplotlib |
 | Random-number seed | `RngSeedManager::SetSeed(1)` |
 | Run number | RngRun = 1 (varied 1–5 for repeatability checks) |
 
-> **Why ns-3.40 specifically?** Your project brief explicitly specifies ns-3.40 in Section 4.1. The latest version as of 2025 is 3.47, but all source code in this guide is written and tested for 3.40. Do not use any other version.
-
-> **Note on g++ 13 + ns-3.40:** Newer compilers are stricter. If `./build.py` crashes with C++ internal errors, see [Troubleshooting Section 13](#13-troubleshooting) for the fix.
+> **Note on g++ 13 + ns-3:** Newer compilers are stricter. If `./build.py` crashes with C++ internal errors, see [Troubleshooting Section 13](#13-troubleshooting) for the fix.
 
 ---
 
@@ -48,9 +48,9 @@
 2. [Recommended Timeline (5 Days)](#2-recommended-timeline-5-days)
 3. [GitHub Repository Setup & Workflow](#3-github-repository-setup--workflow)
 4. [Phase 0 — System Setup (Day 1, Everyone)](#4-phase-0--system-setup-day-1-everyone)
-5. [Phase 1 — Install NS-3.40 (Day 1, Everyone)](#5-phase-1--install-ns-340-day-1-everyone)
+5. [Phase 1 — Install NS-3 (Day 1, Everyone)](#5-phase-1--install-ns-3-day-1-everyone)
 6. [Phase 2 — Verify Environment (Day 1, Everyone)](#6-phase-2--verify-environment-day-1-everyone)
-7. [Phase 3 — Install NetAnim 3.108 (Day 1, Xavier mandatory)](#7-phase-3--install-netanim-3108-day-1-xavier-mandatory)
+7. [Phase 3 — Install NetAnim (Day 1, Xavier mandatory)](#7-phase-3--install-netanim-day-1-xavier-mandatory)
 8. [Phase 4a — Task 1: Point-to-Point (Brendan)](#8-phase-4a--task-1-point-to-point-brendan)
 9. [Phase 4b — Task 2: CSMA LAN (Xavier)](#9-phase-4b--task-2-csma-lan-xavier)
 10. [Phase 4c — Task 3: Dumbbell + TCP (Clarence)](#10-phase-4c--task-3-dumbbell--tcp-clarence)
@@ -78,7 +78,7 @@
 
 | Day | Date | Brendan (S1) | Xavier (S2) | Clarence (S3) | Ming Zin (S4) |
 |---|---|---|---|---|---|
-| **Day 1 — Sat 17 May** | Install NS-3.40, get `task1_p2p.cc` compiling | Install NS-3.40 + NetAnim 3.108, get `task2_csma.cc` compiling | Install NS-3.40, get `task3_dumbbell.cc` compiling | Set up Google Drive folder, draft Sections 1–4, start topology diagrams |
+| **Day 1 — Sat 17 May** | Install NS-3, get `task1_p2p.cc` compiling | Install NS-3 + NetAnim, get `task2_csma.cc` compiling | Install NS-3, get `task3_dumbbell.cc` compiling | Set up GitHub repo structure, draft Sections 1–4, start topology diagrams |
 | **Day 2 — Sun 18 May** | Run 20-combo sweep, generate CSV + Figure 5.2 | Run 1/3/5 sender scenarios, open NetAnim, take screenshots | Run dumbbell, generate .dat files, plot cWnd | Continue Sections 1–4, draw Figures 5.1/6.1/7.1 in draw.io |
 | **Day 3 — Mon 19 May** | Fill Tables 5.1/5.2, write Section 5 analysis | Fill Tables 6.1/6.2, write Section 6 analysis | Fill Table 7.1, write Section 7 analysis | Draft Section 8 (Cross-Task Synthesis) |
 | **Day 4 — Tue 20 May** | Push branch, open PR on GitHub | Push branch, open PR on GitHub | Push branch, open PR on GitHub | Merge all 3 PRs, pull main, assemble report, replace ALL `[INSERT]` placeholders, write Sections 9/10 |
@@ -161,11 +161,11 @@ main                    ← Ming Zin's branch (report + merges)
 ```bash
 git checkout -b feat/task1-brendan
 
-cp ~/ns-allinone-3.40/ns-3.40/scratch/task1_p2p.cc     src/
-cp ~/ns-allinone-3.40/ns-3.40/task1_sweep.sh            scripts/
-cp ~/ns-allinone-3.40/ns-3.40/plot_task1.py             scripts/
-cp ~/ns-allinone-3.40/ns-3.40/task1_results.csv         results/
-cp ~/ns-allinone-3.40/ns-3.40/figure_5_2.png            results/
+cp ~/ns-allinone-3.43/ns-3.43/scratch/task1_p2p.cc     src/
+cp ~/ns-allinone-3.43/ns-3.43/task1_sweep.sh            scripts/
+cp ~/ns-allinone-3.43/ns-3.43/plot_task1.py             scripts/
+cp ~/ns-allinone-3.43/ns-3.43/task1_results.csv         results/
+cp ~/ns-allinone-3.43/ns-3.43/figure_5_2.png            results/
 cp ~/path/to/5.1_task1_run.png                          screenshots/
 
 git add .
@@ -185,11 +185,11 @@ git push origin feat/task1-brendan
 ```bash
 git checkout -b feat/task2-xavier
 
-cp ~/ns-allinone-3.40/ns-3.40/scratch/task2_csma.cc     src/
-cp ~/ns-allinone-3.40/ns-3.40/task2_csma_5senders.xml   results/task2_csma.xml
-cp ~/ns-allinone-3.40/ns-3.40/task2_n*.log              results/
-cp ~/ns-allinone-3.40/ns-3.40/plot_task2.py             scripts/
-cp ~/ns-allinone-3.40/ns-3.40/figure_6_2.png            results/
+cp ~/ns-allinone-3.43/ns-3.43/scratch/task2_csma.cc     src/
+cp ~/ns-allinone-3.43/ns-3.43/task2_csma_5senders.xml   results/task2_csma.xml
+cp ~/ns-allinone-3.43/ns-3.43/task2_n*.log              results/
+cp ~/ns-allinone-3.43/ns-3.43/plot_task2.py             scripts/
+cp ~/ns-allinone-3.43/ns-3.43/figure_6_2.png            results/
 cp ~/path/to/6.1_netanim.png                            screenshots/
 cp ~/path/to/6.2_task2_terminal.png                     screenshots/
 
@@ -211,11 +211,11 @@ git push origin feat/task2-xavier
 ```bash
 git checkout -b feat/task3-clarence
 
-cp ~/ns-allinone-3.40/ns-3.40/scratch/task3_dumbbell.cc src/
-cp ~/ns-allinone-3.40/ns-3.40/cwnd-newreno.dat          results/
-cp ~/ns-allinone-3.40/ns-3.40/cwnd-cubic.dat            results/
-cp ~/ns-allinone-3.40/ns-3.40/cwnd_comparison.png       results/
-cp ~/ns-allinone-3.40/ns-3.40/plot_cwnd.py              scripts/
+cp ~/ns-allinone-3.43/ns-3.43/scratch/task3_dumbbell.cc src/
+cp ~/ns-allinone-3.43/ns-3.43/cwnd-newreno.dat          results/
+cp ~/ns-allinone-3.43/ns-3.43/cwnd-cubic.dat            results/
+cp ~/ns-allinone-3.43/ns-3.43/cwnd_comparison.png       results/
+cp ~/ns-allinone-3.43/ns-3.43/plot_cwnd.py              scripts/
 cp ~/path/to/7.1_task3_run.png                          screenshots/
 
 git add .
@@ -363,22 +363,32 @@ gnuplot --version
 
 ---
 
-## 5. Phase 1 — Install NS-3.40 (Day 1, Everyone)
+## 5. Phase 1 — Install NS-3 (Day 1, Everyone)
 
-### 5.1 Download the official NS-3.40 tarball
+### 5.1 Decide on a version (do this as a group first)
 
+Your lab used ns-3.43. The latest is ns-3.47. Pick one right now in your group chat and make sure everyone downloads the same one. This guide uses **ns-3.43** in the commands below — if you go with 3.47 just swap the version number everywhere.
+
+### 5.2 Download the tarball
+
+**ns-3.43:**
 ```bash
 cd ~
-wget https://www.nsnam.org/releases/ns-allinone-3.40.tar.bz2
+wget https://www.nsnam.org/releases/ns-allinone-3.43.tar.bz2
 ```
 
-> This is the only correct download URL for NS-3.40. As of 2025 the latest NS-3 version is 3.47, but your project report explicitly specifies **ns-3.40** in Section 4.1 and all source code in this guide is written for 3.40.
+**ns-3.47 (latest):**
+```bash
+cd ~
+wget https://www.nsnam.org/releases/ns-allinone-3.47.tar.bz2
+```
 
-### 5.2 Extract and build
+### 5.3 Extract and build
 
 ```bash
-tar xjf ns-allinone-3.40.tar.bz2
-cd ns-allinone-3.40
+# Replace 3.43 with 3.47 if that's what you downloaded
+tar xjf ns-allinone-3.43.tar.bz2
+cd ns-allinone-3.43
 ./build.py --enable-examples --enable-tests
 ```
 
@@ -393,18 +403,18 @@ Build finished successfully.
 Your NS-3 root directory is:
 
 ```
-~/ns-allinone-3.40/ns-3.40/
+~/ns-allinone-3.43/ns-3.43/    # or ns-allinone-3.47/ns-3.47/ if you used 3.47
 ```
 
 All simulation commands from this point are run from inside that directory.
 
-### 5.3 Alternative — Git clone (use only if tarball download fails)
+### 5.4 Alternative — Git clone (use only if tarball download fails)
 
 ```bash
 cd ~
-git clone https://gitlab.com/nsnam/ns-3-dev.git ns-3.40
-cd ns-3.40
-git checkout ns-3.40
+git clone https://gitlab.com/nsnam/ns-3-dev.git ns-3
+cd ns-3
+git checkout ns-3.43    # or ns-3.47
 ./ns3 configure --enable-examples --enable-tests
 ./ns3 build
 ```
@@ -418,13 +428,13 @@ All 4 members must run these checks and confirm outputs match before doing anyth
 ### 6.1 Check NS-3 version
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40
+cd ~/ns-allinone-3.43/ns-3.43    # adjust if you used 3.47
 ./ns3 --version
 ```
 
-Expected:
+Expected (example for 3.43):
 ```
-ns-3.40
+ns-3.43
 ```
 
 ### 6.2 Run hello-simulator
@@ -452,18 +462,21 @@ Screenshot your terminal showing all three outputs above and share in the group 
 
 ---
 
-## 7. Phase 3 — Install NetAnim 3.108 (Day 1, Xavier mandatory)
+## 7. Phase 3 — Install NetAnim (Day 1, Xavier mandatory)
 
 NetAnim is bundled inside the ns-allinone tarball. You only need to compile it.
 
 ### 7.1 Build NetAnim
 
 ```bash
-cd ~/ns-allinone-3.40/netanim-3.108
+# Adjust version number to match what you installed
+cd ~/ns-allinone-3.43/netanim-3.113    # folder name varies by ns-3 version
 make clean
 qmake NetAnim.pro
 make -j$(nproc)
 ```
+
+> The NetAnim folder name (e.g. `netanim-3.113`) depends on which ns-3 version you downloaded. Run `ls ~/ns-allinone-3.43/` to see the exact folder name after extraction.
 
 A `NetAnim` executable will appear in that folder.
 
@@ -490,7 +503,8 @@ export DISPLAY=:0
 ### 7.3 Add NetAnim to your PATH (convenience)
 
 ```bash
-echo 'export PATH="$HOME/ns-allinone-3.40/netanim-3.108:$PATH"' >> ~/.bashrc
+# Adjust the path to match your actual netanim folder name
+echo 'export PATH="$HOME/ns-allinone-3.43/netanim-3.113:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -507,7 +521,7 @@ Now you can type `NetAnim` from anywhere.
 ### 8.1 Create the source file
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40/scratch
+cd ~/ns-allinone-3.43/ns-3.43/scratch
 nano task1_p2p.cc
 ```
 
@@ -625,7 +639,7 @@ Save: `Ctrl+O` → Enter → `Ctrl+X`
 ### 8.2 Build and single test run
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40
+cd ~/ns-allinone-3.43/ns-3.43
 ./ns3 build
 ./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.00"
 ```
@@ -642,7 +656,7 @@ Screenshot your terminal showing the `./ns3 build` success and the `Flow 1 Throu
 ### 8.4 Run the 20-combination sweep
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40
+cd ~/ns-allinone-3.43/ns-3.43
 nano task1_sweep.sh
 ```
 
@@ -772,7 +786,7 @@ Then open a **Pull Request** on GitHub: `feat/task1-brendan` → `main`.
 ### 9.1 Create the source file
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40/scratch
+cd ~/ns-allinone-3.43/ns-3.43/scratch
 nano task2_csma.cc
 ```
 
@@ -896,7 +910,7 @@ int main(int argc, char *argv[])
 ### 9.2 Build and test
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40
+cd ~/ns-allinone-3.43/ns-3.43
 ./ns3 build
 ./ns3 run "scratch/task2_csma --nSenders=1"
 ```
@@ -995,7 +1009,7 @@ Then open a **Pull Request** on GitHub: `feat/task2-xavier` → `main`.
 ### 10.1 Create the source file
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40/scratch
+cd ~/ns-allinone-3.43/ns-3.43/scratch
 nano task3_dumbbell.cc
 ```
 
@@ -1130,7 +1144,7 @@ int main(int argc, char *argv[])
 ### 10.2 Build and run
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40
+cd ~/ns-allinone-3.43/ns-3.43
 ./ns3 build
 ./ns3 run scratch/task3_dumbbell
 ```
@@ -1392,10 +1406,10 @@ sudo apt install python3-matplotlib python3-numpy -y
 ```
 This is already how Section 4.4 installs them.
 
-**NS-3.40 build fails with C++ errors inside NS-3 source files**
+**NS-3.43 build fails with C++ errors inside NS-3 source files**
 g++ 13 is stricter than g++ 11. Apply this patch before building:
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40
+cd ~/ns-allinone-3.43/ns-3.43
 find . -name "*.cc" -o -name ".h" | xargs grep -l "uint8_t\|uint32_t" | head -5
 ```
 If the build fails on a specific file, the most common fix is:
@@ -1440,9 +1454,9 @@ Abort with Ctrl+C and run that combination manually:
 ## 14. Submission Checklist
 
 ### Source code
-- [ ] `task1_p2p.cc` — compiles on NS-3.40, runs cleanly
-- [ ] `task2_csma.cc` — compiles on NS-3.40, runs cleanly
-- [ ] `task3_dumbbell.cc` — compiles on NS-3.40, runs cleanly
+- [ ] `task1_p2p.cc` — compiles on NS-3.43, runs cleanly
+- [ ] `task2_csma.cc` — compiles on NS-3.43, runs cleanly
+- [ ] `task3_dumbbell.cc` — compiles on NS-3.43, runs cleanly
 - [ ] All 3 files have header comment with group number, task, and student name
 
 ### Data outputs
@@ -1486,8 +1500,8 @@ Abort with Ctrl+C and run that combination manually:
 ## Quick Command Reference
 
 ```bash
-# Everyone — verify NS-3.40
-cd ~/ns-allinone-3.40/ns-3.40 && ./ns3 --version
+# Everyone — verify NS-3.43
+cd ~/ns-allinone-3.43/ns-3.43 && ./ns3 --version
 
 # Everyone — clone repo (Day 1)
 git clone https://github.com/chuanheng02/TNN4113-Network-Performance-Analysis.git
