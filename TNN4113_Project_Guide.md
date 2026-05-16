@@ -1,10 +1,29 @@
 # TNN4113 Computer Networks — Complete Project Execution Guide
 
 **Project:** Network Performance Analysis Using NS-3 Simulator
+**Course:** TNN4113 Computer Networks
 **Submission Date:** 21 May 2026
 **Team Size:** 4 students
-**ns-3 Version Target:** 3.40
-**Host OS Target:** Ubuntu 22.04 LTS (native) or Windows 11 + WSL2 + Ubuntu 22.04
+**Group:** Group 4
+
+---
+
+## ⚠️ Mandatory Environment Specification
+
+This is taken **directly from your project report template (Section 4.1 — Methodology and Common Setup)**. Every member must match these versions exactly.
+
+| Item | Version / Value |
+|---|---|
+| Operating System | Ubuntu 22.04 LTS (under WSL2 / native Linux) |
+| ns-3 release | **ns-3.40** |
+| Compiler | g++ 11.4 with C++17 |
+| Build system | CMake via ./ns3 wrapper |
+| NetAnim version | **3.108** |
+| Plotting tool | gnuplot 5.4 / Python 3.10 + Matplotlib 3.7 |
+| Random-number seed | RngSeedManager::SetSeed(1) |
+| Run number | RngRun = 1 (varied 1–5 for repeatability checks) |
+
+> **Why 3.40 specifically?** The latest NS-3 version as of 2025 is 3.47, but your project brief explicitly specifies 3.40. All source code in this guide was written and tested for 3.40. Do not use any other version — using a different version risks API mismatches and will contradict what you declare in your submitted report.
 
 ---
 
@@ -12,73 +31,104 @@
 
 1. [Team Roles & Responsibilities](#1-team-roles--responsibilities)
 2. [Recommended Timeline (5 Days)](#2-recommended-timeline-5-days)
-3. [Phase 0 — Shared Setup (Day 1, Everyone)](#3-phase-0--shared-setup-day-1-everyone)
-4. [Phase 1 — Install NS-3.40 (Day 1, Everyone)](#4-phase-1--install-ns-340-day-1-everyone)
-5. [Phase 2 — Install NetAnim (Day 1, Student 2 mandatory, others optional)](#5-phase-2--install-netanim-day-1-student-2-mandatory-others-optional)
-6. [Phase 3 — Set Up Shared Git Repo (Day 1, Student 4 leads)](#6-phase-3--set-up-shared-git-repo-day-1-student-4-leads)
-7. [Phase 4a — Task 1: Point-to-Point (Student 1)](#7-phase-4a--task-1-point-to-point-student-1)
-8. [Phase 4b — Task 2: CSMA LAN (Student 2)](#8-phase-4b--task-2-csma-lan-student-2)
-9. [Phase 4c — Task 3: Dumbbell + TCP (Student 3)](#9-phase-4c--task-3-dumbbell--tcp-student-3)
-10. [Phase 5 — Synthesis & Report Assembly (Student 4)](#10-phase-5--synthesis--report-assembly-student-4)
-11. [Phase 6 — Final Review & Submission (Whole Team)](#11-phase-6--final-review--submission-whole-team)
-12. [Troubleshooting](#12-troubleshooting)
-13. [Submission Checklist](#13-submission-checklist)
+3. [File Sharing — Google Drive (No Git Needed)](#3-file-sharing--google-drive-no-git-needed)
+4. [Phase 0 — System Setup (Day 1, Everyone)](#4-phase-0--system-setup-day-1-everyone)
+5. [Phase 1 — Install NS-3.40 (Day 1, Everyone)](#5-phase-1--install-ns-340-day-1-everyone)
+6. [Phase 2 — Verify Environment (Day 1, Everyone)](#6-phase-2--verify-environment-day-1-everyone)
+7. [Phase 3 — Install NetAnim 3.108 (Day 1, Student 2 mandatory)](#7-phase-3--install-netanim-3108-day-1-student-2-mandatory)
+8. [Phase 4a — Task 1: Point-to-Point (Student 1)](#8-phase-4a--task-1-point-to-point-student-1)
+9. [Phase 4b — Task 2: CSMA LAN (Student 2)](#9-phase-4b--task-2-csma-lan-student-2)
+10. [Phase 4c — Task 3: Dumbbell + TCP (Student 3)](#10-phase-4c--task-3-dumbbell--tcp-student-3)
+11. [Phase 5 — Report Assembly (Student 4)](#11-phase-5--report-assembly-student-4)
+12. [Phase 6 — Final Review & Submission](#12-phase-6--final-review--submission)
+13. [Troubleshooting](#13-troubleshooting)
+14. [Submission Checklist](#14-submission-checklist)
 
 ---
 
 ## 1. Team Roles & Responsibilities
 
-| Student | Role | Primary Deliverables |
-|---|---|---|
-| **Student 1** | Task 1 owner — Point-to-Point | `task1_p2p.cc`, `task1_results.csv`, Tables 5.1 & 5.2, Figure 5.2, Section 5 of report |
-| **Student 2** | Task 2 owner — CSMA LAN | `task2_csma.cc`, `task2_csma.xml`, NetAnim screenshot, Tables 6.1 & 6.2, Figure 6.2, Section 6 of report |
-| **Student 3** | Task 3 owner — Dumbbell / TCP | `task3_dumbbell.cc`, `cwnd-newreno.dat`, `cwnd-cubic.dat`, `cwnd_comparison.png`, Table 7.1, Section 7 of report |
-| **Student 4** | Task 4 owner — Synthesis & Reporting | Integration of all parts, Sections 1–4, 8, 9, 10, 11, 12; final proofreading; submission package |
+| Student | Role | Simulation File | Key Deliverables |
+|---|---|---|---|
+| **Student 1** | Task 1 — Point-to-Point | `task1_p2p.cc` | `task1_results.csv`, Tables 5.1 & 5.2, Figure 5.2, Screenshot 5.1, Section 5 |
+| **Student 2** | Task 2 — CSMA LAN | `task2_csma.cc` | `task2_csma.xml`, Tables 6.1 & 6.2, Figure 6.2, Screenshots 6.1 & 6.2, Section 6 |
+| **Student 3** | Task 3 — Dumbbell TCP | `task3_dumbbell.cc` | `cwnd-newreno.dat`, `cwnd-cubic.dat`, `cwnd_comparison.png`, Table 7.1, Screenshot 7.1, Section 7 |
+| **Student 4** | Task 4 — Synthesis & Report | None | Topology diagrams (Figs 5.1/6.1/7.1), Sections 1–4 & 8–12, final report merge, submission zip |
 
-**Rule of thumb:** Every student installs ns-3.40 on their own machine even if they're not the task owner — you'll need it for testing and integration.
+**Important:** Each student runs their own simulation **independently on their own laptop**. There is no shared simulation — you each have a different `.cc` file and generate different output files. Only at the end does Student 4 collect everyone's outputs and assemble the final package.
 
 ---
 
 ## 2. Recommended Timeline (5 Days)
 
-| Day | Date | Everyone | Student 1 | Student 2 | Student 3 | Student 4 |
-|---|---|---|---|---|---|---|
-| **Day 1 — Sat 17 May** | Setup | Install Ubuntu/WSL2, ns-3.40, NetAnim, agree on Git repo | Get task1_p2p.cc compiling | Get task2_csma.cc compiling | Get task3_dumbbell.cc compiling | Set up repo, create branches, draft Section 1–4 |
-| **Day 2 — Sun 18 May** | Build | Each task owner runs full simulation sweep | Run 20 parameter combos, fill Tables 5.1/5.2 | Run 1/3/5 sender scenarios, capture NetAnim | Run Dumbbell, generate .dat files, plot cwnd | Continue Sections 1–4 |
-| **Day 3 — Mon 19 May** | Analyze | Each task owner writes their analysis section | Write Section 5 analysis, finalize Figure 5.2 | Write Section 6 analysis, take screenshots | Identify drop events, fill Table 7.1, write Section 7 | Draft Section 8 (Synthesis) |
-| **Day 4 — Tue 20 May** | Integrate | Student 4 merges everything | Hand off to S4 | Hand off to S4 | Hand off to S4 | Replace ALL placeholders, write Sections 8/9, polish |
-| **Day 5 — Wed 21 May** | Submit | Final review + submission before deadline | Review S4's merged Section 5 | Review S4's merged Section 6 | Review S4's merged Section 7 | Final formatting, generate PDF, upload to eLeap |
+| Day | Date | Student 1 | Student 2 | Student 3 | Student 4 |
+|---|---|---|---|---|---|
+| **Day 1 — Sat 17 May** | Install NS-3.40, get `task1_p2p.cc` compiling | Install NS-3.40 + NetAnim 3.108, get `task2_csma.cc` compiling | Install NS-3.40, get `task3_dumbbell.cc` compiling | Set up Google Drive folder, draft Sections 1–4, start topology diagrams |
+| **Day 2 — Sun 18 May** | Run 20-combo sweep, generate CSV + Figure 5.2 | Run 1/3/5 sender scenarios, open NetAnim, take screenshots | Run dumbbell, generate .dat files, plot cWnd | Continue Sections 1–4, draw Figures 5.1/6.1/7.1 in draw.io |
+| **Day 3 — Mon 19 May** | Fill Tables 5.1/5.2, write Section 5 analysis | Fill Tables 6.1/6.2, write Section 6 analysis | Fill Table 7.1, write Section 7 analysis | Draft Section 8 (Cross-Task Synthesis) |
+| **Day 4 — Tue 20 May** | Upload all files to Drive, review merged doc | Upload all files to Drive, review merged doc | Upload all files to Drive, review merged doc | Merge everyone's work into report, replace ALL `[INSERT]` placeholders, write Sections 9/10 |
+| **Day 5 — Wed 21 May** | Final check of Section 5 in merged report | Final check of Section 6 in merged report | Final check of Section 7 in merged report | Export PDF, assemble zip, upload to eLeap before deadline |
 
 ---
 
-## 3. Phase 0 — Shared Setup (Day 1, Everyone)
+## 3. File Sharing — Google Drive (No Git Needed)
 
-### 3.1 If you're on Windows 11 — Install WSL2 + Ubuntu 22.04
+You do not need GitHub. Create one shared Google Drive folder and use this structure:
 
-Open **PowerShell as Administrator** and run:
+```
+Group4_TNN4113/
+├── src/
+│   ├── task1_p2p.cc          ← Student 1 uploads here
+│   ├── task2_csma.cc          ← Student 2 uploads here
+│   └── task3_dumbbell.cc      ← Student 3 uploads here
+├── results/
+│   ├── task1_results.csv      ← Student 1
+│   ├── task2_csma.xml         ← Student 2 (5-sender run)
+│   ├── cwnd-newreno.dat       ← Student 3
+│   ├── cwnd-cubic.dat         ← Student 3
+│   ├── figure_5_2.png         ← Student 1
+│   ├── figure_6_2.png         ← Student 2
+│   └── cwnd_comparison.png    ← Student 3
+├── screenshots/
+│   ├── 5.1_task1_run.png      ← Student 1
+│   ├── 6.1_netanim.png        ← Student 2
+│   ├── 6.2_task2_terminal.png ← Student 2
+│   └── 7.1_task3_run.png      ← Student 3
+└── report/
+    └── TNN4113_Project_Report.docx  ← Student 4 owns this
+```
+
+Student 4 creates the folder on Day 1 and shares it with all members. Each student uploads their files as they complete them — don't wait until Day 4.
+
+---
+
+## 4. Phase 0 — System Setup (Day 1, Everyone)
+
+### 4.1 If you are on Windows — Install WSL2 + Ubuntu 22.04
+
+Open **PowerShell as Administrator:**
 
 ```powershell
 wsl --install -d Ubuntu-22.04
 ```
 
-Reboot if prompted. After reboot, open Ubuntu from the Start menu, set a UNIX username + password.
+Reboot when prompted. Open Ubuntu from the Start menu, create a UNIX username and password. Then update WSL:
 
-Update WSL kernel (PowerShell):
 ```powershell
 wsl --update
 ```
 
-### 3.2 If you're on native Ubuntu 22.04 — Skip to 3.3
+### 4.2 If you are on native Ubuntu 22.04 — Skip to 4.3
 
-### 3.3 Install required system packages
-
-Inside your Ubuntu shell (WSL or native), run:
+### 4.3 Update your system
 
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
 
-Then install all dependencies ns-3.40 needs:
+### 4.4 Install all required packages
+
+The following command has been corrected from the original — `sqlite` (which does not exist as a standalone package on Ubuntu 22.04) has been removed, and `libgcrypt-dev` has been replaced with `libgcrypt20-dev` which is the correct package name on this OS version:
 
 ```bash
 sudo apt install -y \
@@ -93,55 +143,62 @@ sudo apt install -y \
   libgtk-3-dev gnuplot wget tar bzip2 unzip
 ```
 
-Then install matplotlib for plotting:
+> **Note on sqlite:** `sqlite3` and `libsqlite3-dev` are included above and are sufficient. The standalone `sqlite` package does not exist on Ubuntu 22.04 — ignore any guides that list it. NS-3 does not require it for any of your three tasks.
+
+Then install Python plotting libraries:
 
 ```bash
 pip3 install --user matplotlib numpy
 ```
 
-### 3.4 Verify your toolchain
+### 4.5 Verify toolchain
 
 ```bash
-g++ --version          # should be 11.x or newer
-python3 --version      # should be 3.10 or newer
-cmake --version        # should be 3.22 or newer
-qmake --version        # should report Qt 5.15.x
-gnuplot --version      # should be 5.4
+g++ --version        # must show 11.x
+python3 --version    # must show 3.10.x
+cmake --version      # must show 3.22 or newer
+qmake --version      # must show Qt 5.15.x
+gnuplot --version    # must show 5.4
 ```
-
-If any are missing, fix that before going further.
 
 ---
 
-## 4. Phase 1 — Install NS-3.40 (Day 1, Everyone)
+## 5. Phase 1 — Install NS-3.40 (Day 1, Everyone)
 
-You have two options. **Pick Option A unless you hit a network issue.**
-
-### 4.1 Option A — Official tarball (recommended)
+### 5.1 Download the official NS-3.40 tarball
 
 ```bash
 cd ~
 wget https://www.nsnam.org/releases/ns-allinone-3.40.tar.bz2
+```
+
+> This is the only correct download URL for NS-3.40. Do not download any other version. As of 2025 the latest NS-3 version is 3.47, but your project report explicitly specifies **ns-3.40** in Section 4.1 and the source code in this guide is written for 3.40.
+
+### 5.2 Extract and build
+
+```bash
 tar xjf ns-allinone-3.40.tar.bz2
 cd ns-allinone-3.40
 ./build.py --enable-examples --enable-tests
 ```
 
-This downloads ≈70 MB and compiles for 15–40 minutes depending on CPU. Be patient.
+This takes **15–40 minutes** depending on your machine. Do not interrupt it. You will see many compiler lines scroll past — that is normal.
 
-When it finishes you should see something like:
+When it finishes you will see:
 
 ```
 Build finished successfully.
 ```
 
-Your working ns-3 root will be:
+Your NS-3 root directory is:
 
 ```
 ~/ns-allinone-3.40/ns-3.40/
 ```
 
-### 4.2 Option B — Git clone (use if tarball download fails)
+All simulation commands from this point are run from inside that directory.
+
+### 5.3 Alternative — Git clone (use only if tarball download fails)
 
 ```bash
 cd ~
@@ -152,44 +209,54 @@ git checkout ns-3.40
 ./ns3 build
 ```
 
-Your working ns-3 root will be:
+---
 
-```
-~/ns-3.40/
-```
+## 6. Phase 2 — Verify Environment (Day 1, Everyone)
 
-### 4.3 Verify NS-3 works
+All 4 members must run these checks and confirm the outputs match before doing anything else. This ensures you are all on identical environments as required by Section 4.1 of the report.
 
-From your ns-3 root directory:
+### 6.1 Check NS-3 version
 
 ```bash
-cd ~/ns-allinone-3.40/ns-3.40   # or ~/ns-3.40 if Option B
+cd ~/ns-allinone-3.40/ns-3.40
+./ns3 --version
+```
+
+Expected output:
+```
+ns-3.40
+```
+
+### 6.2 Run hello-simulator
+
+```bash
 ./ns3 run hello-simulator
 ```
 
 Expected output:
-
 ```
 Hello Simulator
 ```
 
-If you see that, **ns-3 is working**. If not, go to [Troubleshooting](#12-troubleshooting).
-
-### 4.4 Test a real example
+### 6.3 Run a full example
 
 ```bash
-./ns3 run "first"
+./ns3 run first
 ```
 
-This runs the canonical first.cc example. You should see TCP packet exchange logs. If that works, every example in the ns-3 distribution works for you too.
+You should see TCP packet-exchange log lines. If this works, your NS-3 installation is fully functional.
+
+### 6.4 Environment verification summary
+
+Screenshot your terminal showing all three outputs above and share in your group chat. Once all 4 members have confirmed matching outputs, you are ready to proceed.
 
 ---
 
-## 5. Phase 2 — Install NetAnim (Day 1, Student 2 mandatory, others optional)
+## 7. Phase 3 — Install NetAnim 3.108 (Day 1, Student 2 mandatory)
 
-NetAnim is the GUI animator. It's bundled with the ns-allinone tarball but needs to be built separately.
+NetAnim is bundled inside the ns-allinone tarball. You only need to compile it.
 
-### 5.1 Build NetAnim
+### 7.1 Build NetAnim
 
 ```bash
 cd ~/ns-allinone-3.40/netanim-3.108
@@ -198,125 +265,53 @@ qmake NetAnim.pro
 make -j$(nproc)
 ```
 
-If the build succeeds you'll see a `NetAnim` executable.
+A `NetAnim` executable will appear in that folder.
 
-### 5.2 Launch NetAnim (graphical)
+### 7.2 Launch NetAnim
 
 **On native Ubuntu:**
 ```bash
 ./NetAnim
 ```
 
-**On WSL2 + Windows 11:** Windows 11 supports Linux GUI apps out of the box (WSLg). Just run:
+**On WSL2 (Windows 11):** WSLg supports Linux GUI apps natively. Just run:
 ```bash
 ./NetAnim
 ```
-A window should pop up. If nothing appears, run:
+
+A window should appear. If it does not, run `wsl --update` in PowerShell and try again.
+
+**On WSL2 (Windows 10):** Install VcXsrv on Windows, then:
 ```bash
-sudo apt install -y x11-apps && xeyes
+export DISPLAY=:0
+./NetAnim
 ```
-to verify GUI forwarding is working.
 
-**On WSL1 or older Windows 10:** install VcXsrv on Windows, set `export DISPLAY=:0` in your shell, then launch.
-
-### 5.3 Add NetAnim to your PATH (optional convenience)
+### 7.3 Add NetAnim to your PATH (convenience)
 
 ```bash
 echo 'export PATH="$HOME/ns-allinone-3.40/netanim-3.108:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-Now `NetAnim` works from anywhere.
+Now you can just type `NetAnim` from anywhere.
 
 ---
 
-## 6. Phase 3 — Set Up Shared Git Repo (Day 1, Student 4 leads)
+## 8. Phase 4a — Task 1: Point-to-Point (Student 1)
 
-Coordination saves you on Day 4. Use GitHub (free, private repos for students).
+**Goal:** Measure how channel delay and packet error rate degrade TCP throughput on a single P2P link.
 
-### 6.1 Student 4 creates the repo
+**What you produce:** `task1_p2p.cc`, `task1_results.csv`, `figure_5_2.png`, Screenshot 5.1, Tables 5.1 & 5.2, Section 5.
 
-1. Go to https://github.com/new
-2. Repo name: `TNN4113-NS3-Project`
-3. Visibility: **Private**
-4. Initialize with a README
-5. Click Create
-
-### 6.2 Student 4 adds teammates as collaborators
-
-Settings → Collaborators → Add people → enter each teammate's GitHub username.
-
-### 6.3 Everyone clones the repo locally
-
-```bash
-cd ~
-git clone https://github.com/<student4-username>/TNN4113-NS3-Project.git
-cd TNN4113-NS3-Project
-```
-
-### 6.4 Recommended folder structure
-
-Student 4 creates this structure and pushes:
-
-```
-TNN4113-NS3-Project/
-├── README.md
-├── src/
-│   ├── task1_p2p.cc
-│   ├── task2_csma.cc
-│   └── task3_dumbbell.cc
-├── scripts/
-│   ├── task1_sweep.sh
-│   ├── plot_cwnd.gp
-│   └── plot_cwnd.py
-├── results/
-│   ├── task1_results.csv
-│   ├── task2_csma.xml
-│   ├── cwnd-newreno.dat
-│   ├── cwnd-cubic.dat
-│   └── cwnd_comparison.png
-├── screenshots/
-│   ├── 5.1_task1_run.png
-│   ├── 6.1_netanim.png
-│   ├── 6.2_task2_terminal.png
-│   └── 7.1_task3_run.png
-└── report/
-    └── TNN4113_Project_Report.docx
-```
-
-### 6.5 Branching strategy
-
-```bash
-# Student 1
-git checkout -b student1-task1
-
-# Student 2
-git checkout -b student2-task2
-
-# Student 3
-git checkout -b student3-task3
-
-# Student 4 works on main
-```
-
-Each student pushes their branch, opens a Pull Request when their task is done. Student 4 merges all PRs into `main` on Day 4.
-
----
-
-## 7. Phase 4a — Task 1: Point-to-Point (Student 1)
-
-**Goal:** measure how channel delay and packet error rate degrade TCP throughput.
-
-### 7.1 Place the source file
-
-Create `task1_p2p.cc` inside the ns-3 `scratch/` directory:
+### 8.1 Create the source file
 
 ```bash
 cd ~/ns-allinone-3.40/ns-3.40/scratch
 nano task1_p2p.cc
 ```
 
-Paste the **complete, fully commented** source below:
+Paste the complete source code below:
 
 ```cpp
 /*
@@ -324,10 +319,10 @@ Paste the **complete, fully commented** source below:
  * Point-to-Point Network: Link Characteristic & Reliability Analysis
  *
  * Topology:  Node 0  <-- 5 Mbps, variable delay, variable error -->  Node 1
- *            (BulkSendApplication / TCP source)              (PacketSink / TCP sink)
+ *            (BulkSendApplication / TCP source)         (PacketSink / TCP sink)
  *
- * Varied:    channel delay  ∈ {2ms, 10ms, 30ms, 60ms, 100ms}
- *            error rate     ∈ {0.00, 0.01, 0.03, 0.05}  (per-packet, on receiver side)
+ * Varied:    channel delay  in {2ms, 10ms, 30ms, 60ms, 100ms}
+ *            error rate     in {0.00, 0.01, 0.03, 0.05}  (per-packet)
  *
  * Measured:  FlowMonitor throughput, lost packets, mean delay.
  */
@@ -345,22 +340,19 @@ NS_LOG_COMPONENT_DEFINE("Task1P2P");
 
 int main(int argc, char *argv[])
 {
-    // --------- Default parameter values (overridable via command line) ---------
-    std::string delayStr = "10ms";   // varied: 2ms, 10ms, 30ms, 60ms, 100ms
-    double      errRate  = 0.00;     // varied: 0.00, 0.01, 0.03, 0.05
-    uint32_t    simTime  = 30;       // seconds
+    std::string delayStr = "10ms";
+    double      errRate  = 0.00;
+    uint32_t    simTime  = 30;
 
     CommandLine cmd;
-    cmd.AddValue("delay",   "Channel propagation delay",        delayStr);
-    cmd.AddValue("errRate", "Per-packet error rate at receiver", errRate);
-    cmd.AddValue("simTime", "Simulation time in seconds",        simTime);
+    cmd.AddValue("delay",   "Channel propagation delay",         delayStr);
+    cmd.AddValue("errRate", "Per-packet error rate at receiver",  errRate);
+    cmd.AddValue("simTime", "Simulation time in seconds",         simTime);
     cmd.Parse(argc, argv);
 
-    // --------- Force TCP variant to NewReno (Task 1 spec) ---------
     Config::SetDefault("ns3::TcpL4Protocol::SocketType",
                        StringValue("ns3::TcpNewReno"));
 
-    // --------- Topology: 2 nodes, 1 p2p link ---------
     NodeContainer nodes;
     nodes.Create(2);
 
@@ -370,14 +362,12 @@ int main(int argc, char *argv[])
 
     NetDeviceContainer devs = p2p.Install(nodes);
 
-    // --------- Inject packet loss at the receiver NIC ---------
     Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
     em->SetAttribute("ErrorRate", DoubleValue(errRate));
     em->SetAttribute("ErrorUnit",
                      EnumValue(RateErrorModel::ERROR_UNIT_PACKET));
     devs.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(em));
 
-    // --------- Internet stack and IPv4 addressing ---------
     InternetStackHelper stack;
     stack.Install(nodes);
 
@@ -385,11 +375,10 @@ int main(int argc, char *argv[])
     addr.SetBase("10.1.1.0", "255.255.255.0");
     Ipv4InterfaceContainer ifs = addr.Assign(devs);
 
-    // --------- BulkSend on Node 0, PacketSink on Node 1 ---------
     uint16_t port = 9;
     BulkSendHelper src("ns3::TcpSocketFactory",
                        InetSocketAddress(ifs.GetAddress(1), port));
-    src.SetAttribute("MaxBytes", UintegerValue(0));   // 0 = unbounded
+    src.SetAttribute("MaxBytes", UintegerValue(0));
     ApplicationContainer srcApp = src.Install(nodes.Get(0));
     srcApp.Start(Seconds(1.0));
     srcApp.Stop(Seconds(simTime));
@@ -400,7 +389,6 @@ int main(int argc, char *argv[])
     sinkApp.Start(Seconds(0.0));
     sinkApp.Stop(Seconds(simTime));
 
-    // --------- FlowMonitor on all nodes ---------
     FlowMonitorHelper fmh;
     Ptr<FlowMonitor> fm = fmh.InstallAll();
 
@@ -410,18 +398,17 @@ int main(int argc, char *argv[])
     fm->CheckForLostPackets();
     auto stats = fm->GetFlowStats();
 
-    // --------- Print result line for each flow ---------
     for (auto &kv : stats) {
         double thrMbps = kv.second.rxBytes * 8.0 / ((simTime - 1) * 1e6);
         double delayMs = 0.0;
         if (kv.second.rxPackets > 0) {
-            delayMs = (kv.second.delaySum.GetSeconds() / kv.second.rxPackets) * 1000.0;
+            delayMs = (kv.second.delaySum.GetSeconds() /
+                       kv.second.rxPackets) * 1000.0;
         }
-        uint64_t lost = kv.second.lostPackets;
-        std::cout << "Flow "        << kv.first
-                  << "  Throughput=" << thrMbps << " Mbps"
-                  << "  MeanDelay="  << delayMs << " ms"
-                  << "  Lost="       << lost
+        std::cout << "Flow "         << kv.first
+                  << "  Throughput=" << thrMbps   << " Mbps"
+                  << "  MeanDelay="  << delayMs   << " ms"
+                  << "  Lost="       << kv.second.lostPackets
                   << "  TxPackets="  << kv.second.txPackets
                   << "  RxPackets="  << kv.second.rxPackets
                   << std::endl;
@@ -432,28 +419,31 @@ int main(int argc, char *argv[])
 }
 ```
 
-Save and exit nano (`Ctrl+O`, Enter, `Ctrl+X`).
+Save: `Ctrl+O` → Enter → `Ctrl+X`
 
-### 7.2 Compile and do a single test run
+### 8.2 Build and single test run
 
 ```bash
 cd ~/ns-allinone-3.40/ns-3.40
 ./ns3 build
-./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.01"
+./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.00"
 ```
 
-Expected output is one line like:
+You should see one output line like:
 ```
-Flow 1  Throughput=3.X Mbps  MeanDelay=2X ms  Lost=N  TxPackets=N  RxPackets=N
+Flow 1  Throughput=4.XX Mbps  MeanDelay=XX ms  Lost=0  TxPackets=N  RxPackets=N
 ```
 
-If you got a number, **Task 1 is operational.**
+### 8.3 Take Screenshot 5.1
 
-### 7.3 The 20-combination sweep
+Take a screenshot of your terminal showing the `./ns3 build` success and the `Flow 1 Throughput=...` output line. Save as `5.1_task1_run.png`.
 
-Create the sweep script. Inside the ns-3 root:
+### 8.4 Run the 20-combination sweep
+
+Create the sweep script in the NS-3 root:
 
 ```bash
+cd ~/ns-allinone-3.40/ns-3.40
 nano task1_sweep.sh
 ```
 
@@ -461,11 +451,9 @@ Paste:
 
 ```bash
 #!/bin/bash
-# task1_sweep.sh — iterate every (delay, error-rate) combination
-# Output: task1_results.csv with columns delay,errRate,throughput,meanDelay,lost,pdr
+# task1_sweep.sh — run all 20 (delay, error-rate) combinations
 
 set -e
-
 OUT="task1_results.csv"
 echo "delay_ms,errRate,throughput_Mbps,meanDelay_ms,lost,tx,rx,pdr_pct" > "$OUT"
 
@@ -495,31 +483,22 @@ for d in "${DELAYS[@]}"; do
 done
 
 echo ""
-echo "Done. Results in $OUT"
+echo "Done. Results saved to $OUT"
 column -s, -t "$OUT"
 ```
 
-Make executable and run:
+Run it:
 
 ```bash
 chmod +x task1_sweep.sh
 ./task1_sweep.sh
 ```
 
-Total runtime: ≈10–20 minutes for all 20 combinations. When done, `task1_results.csv` contains every data point you need for Tables 5.1 and 5.2.
+Runtime: approximately 10–20 minutes for all 20 combinations.
 
-### 7.4 Capture Screenshot 5.1
+### 8.5 Plot Figure 5.2
 
-While one of the runs is still on your terminal, take a screenshot showing:
-- the `./ns3 build` line succeeding
-- the `./ns3 run "scratch/task1_p2p ..."` line
-- the `Flow 1 Throughput=...` output line
-
-Save it to `screenshots/5.1_task1_run.png`.
-
-### 7.5 Plot Figure 5.2 — Throughput vs Delay (4 error-rate curves)
-
-Create `plot_task1.py` in the ns-3 root:
+Create `plot_task1.py`:
 
 ```python
 #!/usr/bin/env python3
@@ -528,7 +507,7 @@ import csv
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-data = defaultdict(list)  # data[errRate] = [(delay, thr), ...]
+data = defaultdict(list)
 with open('task1_results.csv') as f:
     for row in csv.DictReader(f):
         d   = float(row['delay_ms'])
@@ -554,71 +533,31 @@ plt.savefig('figure_5_2.png', dpi=150)
 print('Saved figure_5_2.png')
 ```
 
-Run it:
-
+Run:
 ```bash
 python3 plot_task1.py
 ```
 
-Output: `figure_5_2.png` — drop this into your report at Figure 5.2.
+### 8.6 Fill in the report tables
 
-### 7.6 Fill in the report tables
+Open `task1_results.csv`. Pick rows to populate:
 
-Open `task1_results.csv` in a spreadsheet. Pick the rows you need:
+**Table 5.1** — filter where `errRate = 0.00`, use all 5 delay values
+**Table 5.2** — filter where `delay_ms = 10`, use all 4 error rate values
 
-**Table 5.1** (Throughput vs Delay, error rate fixed at 0.00):
-| delay_ms | throughput | meanDelay | lost |
-|---|---|---|---|
-| 2 | (your row) | (your row) | (your row) |
-| 10 | … | … | … |
-| 30 | … | … | … |
-| 60 | … | … | … |
-| 100 | … | … | … |
+### 8.7 Upload to Google Drive
 
-**Table 5.2** (Throughput vs Error Rate, delay fixed at 10 ms):
-| errRate | throughput | tx | rx | pdr_pct |
-|---|---|---|---|---|
-| 0.00 | … | … | … | … |
-| 0.01 | … | … | … | … |
-| 0.03 | … | … | … | … |
-| 0.05 | … | … | … | … |
-
-Copy these into Word, replacing all `[INSERT]` cells in Sections 5.5 and 5.6.
-
-### 7.7 Cross-check analysis text (Section 5.8)
-
-Before declaring done, look at your numbers:
-- Did throughput **fall** monotonically as delay rose? It should.
-- Did throughput **collapse** as error rate rose? It should.
-- If yes, the pre-written Section 5.8 prose is consistent with your data → leave it.
-- If your numbers disagree (e.g. throughput rose with delay — would mean a bug), don't write fiction; debug your script.
-
-### 7.8 Commit your work
-
-```bash
-cp scratch/task1_p2p.cc ~/TNN4113-NS3-Project/src/
-cp task1_sweep.sh        ~/TNN4113-NS3-Project/scripts/
-cp task1_results.csv     ~/TNN4113-NS3-Project/results/
-cp figure_5_2.png        ~/TNN4113-NS3-Project/results/
-cp plot_task1.py         ~/TNN4113-NS3-Project/scripts/
-cp screenshots/5.1*.png  ~/TNN4113-NS3-Project/screenshots/
-
-cd ~/TNN4113-NS3-Project
-git checkout student1-task1
-git add .
-git commit -m "Student 1: complete Task 1 simulation + plots"
-git push origin student1-task1
-```
-
-Open a Pull Request on GitHub targeting `main`. Student 4 will merge.
+Upload to `Group4_TNN4113/src/`, `results/`, and `screenshots/` folders.
 
 ---
 
-## 8. Phase 4b — Task 2: CSMA LAN (Student 2)
+## 9. Phase 4b — Task 2: CSMA LAN (Student 2)
 
-**Goal:** measure how throughput and PDR degrade as more senders contend on a shared CSMA medium.
+**Goal:** Measure how throughput and PDR degrade as more UDP senders contend on a shared 10-node CSMA LAN.
 
-### 8.1 Place the source file
+**What you produce:** `task2_csma.cc`, `task2_csma.xml`, `figure_6_2.png`, Screenshots 6.1 & 6.2, Tables 6.1 & 6.2, Section 6.
+
+### 9.1 Create the source file
 
 ```bash
 cd ~/ns-allinone-3.40/ns-3.40/scratch
@@ -633,13 +572,13 @@ Paste:
  * 10-node CSMA LAN: Shared-Medium Contention Study
  *
  * Topology:  10 nodes (N0..N9) on one CSMA channel
- *            N0 = sink (PacketSink)
+ *            N0 = sink (PacketSink / UDP)
  *            N1..NnSenders = OnOff/UDP senders, each at 5 Mbps CBR
  *
- * Varied:    nSenders ∈ {1, 3, 5}
+ * Varied:    nSenders in {1, 3, 5}
  *
  * Measured:  per-flow throughput, per-flow PDR,
- *            NetAnim XML for visualization.
+ *            NetAnim XML for visualisation.
  */
 
 #include "ns3/core-module.h"
@@ -657,15 +596,14 @@ NS_LOG_COMPONENT_DEFINE("Task2CSMA");
 
 int main(int argc, char *argv[])
 {
-    uint32_t nSenders = 1;       // 1, 3, or 5
-    uint32_t simTime  = 20;      // seconds
+    uint32_t nSenders = 1;
+    uint32_t simTime  = 20;
 
     CommandLine cmd;
     cmd.AddValue("nSenders", "Number of active senders (1, 3, or 5)", nSenders);
     cmd.AddValue("simTime",  "Simulation time in seconds",             simTime);
     cmd.Parse(argc, argv);
 
-    // --------- Topology: 10-node CSMA LAN ---------
     NodeContainer lan;
     lan.Create(10);
 
@@ -675,7 +613,6 @@ int main(int argc, char *argv[])
 
     NetDeviceContainer devs = csma.Install(lan);
 
-    // --------- Internet stack and IPv4 addressing ---------
     InternetStackHelper stack;
     stack.Install(lan);
 
@@ -683,7 +620,6 @@ int main(int argc, char *argv[])
     addr.SetBase("10.2.1.0", "255.255.255.0");
     Ipv4InterfaceContainer ifs = addr.Assign(devs);
 
-    // --------- Sink on N0 ---------
     uint16_t port = 7;
     PacketSinkHelper sink("ns3::UdpSocketFactory",
                           InetSocketAddress(Ipv4Address::GetAny(), port));
@@ -691,7 +627,6 @@ int main(int argc, char *argv[])
     sinkApp.Start(Seconds(0.0));
     sinkApp.Stop(Seconds(simTime));
 
-    // --------- Senders N1..NnSenders, all 5 Mbps CBR UDP ---------
     for (uint32_t i = 1; i <= nSenders; ++i) {
         OnOffHelper on("ns3::UdpSocketFactory",
                        InetSocketAddress(ifs.GetAddress(0), port));
@@ -701,13 +636,11 @@ int main(int argc, char *argv[])
             StringValue("ns3::ConstantRandomVariable[Constant=1]"));
         on.SetAttribute("OffTime",
             StringValue("ns3::ConstantRandomVariable[Constant=0]"));
-
         ApplicationContainer a = on.Install(lan.Get(i));
-        a.Start(Seconds(1.0 + 0.01 * i));    // stagger by 10ms each
+        a.Start(Seconds(1.0 + 0.01 * i));
         a.Stop(Seconds(simTime));
     }
 
-    // --------- NetAnim XML for visualisation ---------
     AnimationInterface anim("task2_csma.xml");
     for (uint32_t i = 0; i < lan.GetN(); ++i) {
         anim.SetConstantPosition(lan.Get(i), i * 5.0, 10.0);
@@ -715,7 +648,6 @@ int main(int argc, char *argv[])
             (i == 0) ? "SINK-N0" : ("N" + std::to_string(i)));
     }
 
-    // --------- FlowMonitor on all nodes ---------
     FlowMonitorHelper fmh;
     Ptr<FlowMonitor> fm = fmh.InstallAll();
 
@@ -723,38 +655,32 @@ int main(int argc, char *argv[])
     Simulator::Run();
 
     fm->CheckForLostPackets();
-    auto cs = DynamicCast<Ipv4FlowClassifier>(fmh.GetClassifier());
+    auto cs    = DynamicCast<Ipv4FlowClassifier>(fmh.GetClassifier());
     auto stats = fm->GetFlowStats();
 
     std::cout << "\n=== Task 2 results (nSenders=" << nSenders << ") ===\n";
     double aggThr = 0.0;
-    int    nFlows = 0;
     for (auto &kv : stats) {
         auto t = cs->FindFlow(kv.first);
         double thrMbps = kv.second.rxBytes * 8.0 / ((simTime - 1) * 1e6);
         double pdr = (kv.second.txPackets == 0) ? 0.0 :
                      100.0 * kv.second.rxPackets / kv.second.txPackets;
-
-        std::cout << "Flow " << kv.first
-                  << "  " << t.sourceAddress << " -> " << t.destinationAddress
+        std::cout << "Flow "   << kv.first
+                  << "  "     << t.sourceAddress << " -> " << t.destinationAddress
                   << "  Thr=" << thrMbps << " Mbps"
                   << "  Tx="  << kv.second.txPackets
                   << "  Rx="  << kv.second.rxPackets
                   << "  PDR=" << pdr << "%\n";
         aggThr += thrMbps;
-        nFlows++;
     }
-    std::cout << "AGGREGATE Throughput at sink = " << aggThr
-              << " Mbps  (across " << nFlows << " flows)\n";
+    std::cout << "AGGREGATE Throughput at sink = " << aggThr << " Mbps\n";
 
     Simulator::Destroy();
     return 0;
 }
 ```
 
-Save (`Ctrl+O`, Enter, `Ctrl+X`).
-
-### 8.2 Build and test
+### 9.2 Build and test
 
 ```bash
 cd ~/ns-allinone-3.40/ns-3.40
@@ -762,63 +688,56 @@ cd ~/ns-allinone-3.40/ns-3.40
 ./ns3 run "scratch/task2_csma --nSenders=1"
 ```
 
-You should see one flow line and an `AGGREGATE Throughput` line.
-
-### 8.3 Run all three scenarios
+### 9.3 Run all three scenarios
 
 ```bash
-./ns3 run "scratch/task2_csma --nSenders=1"  | tee task2_n1.log
-./ns3 run "scratch/task2_csma --nSenders=3"  | tee task2_n3.log
-./ns3 run "scratch/task2_csma --nSenders=5"  | tee task2_n5.log
+./ns3 run "scratch/task2_csma --nSenders=1" | tee task2_n1.log
+./ns3 run "scratch/task2_csma --nSenders=3" | tee task2_n3.log
+./ns3 run "scratch/task2_csma --nSenders=5" | tee task2_n5.log
 ```
 
-Each run regenerates `task2_csma.xml`. **Important:** the XML you keep for submission should come from the **5-sender run** (it's the richest).
+After the 5-sender run, save the XML:
 
-After the 5-sender run finishes, save the XML:
 ```bash
 cp task2_csma.xml task2_csma_5senders.xml
 ```
 
-### 8.4 Open NetAnim and capture Screenshot 6.1
-
-Launch NetAnim:
+### 9.4 Open NetAnim and take Screenshot 6.1
 
 ```bash
-~/ns-allinone-3.40/netanim-3.108/NetAnim
+NetAnim
 ```
 
-1. Click the **folder icon** (top-left) → open `~/ns-allinone-3.40/ns-3.40/task2_csma.xml`
-2. You should see 10 nodes laid out in a horizontal row, N0 labelled "SINK-N0"
-3. Click the **green Play button**
-4. Frame-exchange arrows will appear between sender nodes and the sink
-5. Pause when animation is active — take a screenshot showing:
-   - All 10 nodes visible
-   - Animation in progress (you'll see directed arrows)
-6. Save as `screenshots/6.1_netanim.png`
+1. File → open `task2_csma.xml`
+2. Zoom out so all 10 nodes are visible in a row
+3. Press Play
+4. Let it animate for ~2 seconds then pause
+5. Screenshot while frame-exchange arrows are visible between senders and SINK-N0
+6. Save as `6.1_netanim.png`
 
-### 8.5 Capture Screenshot 6.2 — Terminal FlowMonitor output
+### 9.5 Take Screenshot 6.2
 
-From `task2_n5.log`, take a screenshot of the terminal showing the 5-flow output + aggregate throughput. Save as `screenshots/6.2_task2_terminal.png`.
+Screenshot your terminal showing the 5-sender FlowMonitor output (per-flow Throughput + PDR + AGGREGATE line). Save as `6.2_task2_terminal.png`.
 
-### 8.6 Plot Figure 6.2 — Aggregate throughput + PDR vs senders
+### 9.6 Plot Figure 6.2
 
-Quick way: open a Python REPL with your three log values:
+Fill in your real numbers from the log files, then run:
 
-```bash
-python3 << 'EOF'
+```python
+#!/usr/bin/env python3
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Fill these in from your task2_n1.log / n3.log / n5.log AGGREGATE & PDR lines
-senders     = [1, 3, 5]
-agg_thr     = [4.99, 14.85, 24.00]   # REPLACE with your real values
-mean_pdr    = [100.0, 99.0, 96.0]    # REPLACE with your real values
+# Replace with your real values from task2_n1/n3/n5.log
+senders  = [1, 3, 5]
+agg_thr  = [4.99, 14.85, 24.00]   # REPLACE with real aggregate throughput
+mean_pdr = [100.0, 99.0, 96.0]    # REPLACE with real mean PDR
 
 fig, ax1 = plt.subplots(figsize=(8, 5))
 x = np.arange(len(senders))
-width = 0.35
+w = 0.35
 
-ax1.bar(x - width/2, agg_thr, width, color='steelblue', label='Aggregate Throughput (Mbps)')
+ax1.bar(x - w/2, agg_thr, w, color='steelblue', label='Aggregate Throughput (Mbps)')
 ax1.set_xlabel('Number of Active Senders')
 ax1.set_ylabel('Aggregate Throughput (Mbps)', color='steelblue')
 ax1.tick_params(axis='y', labelcolor='steelblue')
@@ -826,7 +745,7 @@ ax1.set_xticks(x)
 ax1.set_xticklabels(senders)
 
 ax2 = ax1.twinx()
-ax2.bar(x + width/2, mean_pdr, width, color='indianred', label='Mean PDR (%)')
+ax2.bar(x + w/2, mean_pdr, w, color='indianred', label='Mean PDR (%)')
 ax2.set_ylabel('Mean PDR (%)', color='indianred')
 ax2.tick_params(axis='y', labelcolor='indianred')
 ax2.set_ylim(0, 105)
@@ -835,38 +754,21 @@ plt.title('Aggregate Throughput and PDR vs Number of CSMA Senders')
 fig.tight_layout()
 plt.savefig('figure_6_2.png', dpi=150)
 print('Saved figure_6_2.png')
-EOF
 ```
 
-### 8.7 Fill in the report tables
+### 9.7 Upload to Google Drive
 
-From your three log files, populate Table 6.1 (`nSenders=1/3/5` summary) and Table 6.2 (per-flow detail for `nSenders=5`).
-
-### 8.8 Commit
-
-```bash
-cp scratch/task2_csma.cc       ~/TNN4113-NS3-Project/src/
-cp task2_csma_5senders.xml     ~/TNN4113-NS3-Project/results/task2_csma.xml
-cp figure_6_2.png              ~/TNN4113-NS3-Project/results/
-cp task2_n*.log                ~/TNN4113-NS3-Project/results/
-cp screenshots/6.*.png         ~/TNN4113-NS3-Project/screenshots/
-
-cd ~/TNN4113-NS3-Project
-git checkout student2-task2
-git add .
-git commit -m "Student 2: complete Task 2 simulation + NetAnim + plots"
-git push origin student2-task2
-```
-
-Open PR → Student 4 merges.
+Upload all files to their respective folders.
 
 ---
 
-## 9. Phase 4c — Task 3: Dumbbell + TCP (Student 3)
+## 10. Phase 4c — Task 3: Dumbbell + TCP (Student 3)
 
-**Goal:** compare TCP NewReno vs TCP Cubic on a shared bottleneck; plot the cWnd evolution.
+**Goal:** Compare TCP NewReno vs TCP Cubic congestion-window behaviour over a shared 1 Mbps bottleneck.
 
-### 9.1 Place the source file
+**What you produce:** `task3_dumbbell.cc`, `cwnd-newreno.dat`, `cwnd-cubic.dat`, `cwnd_comparison.png`, Screenshot 7.1, Table 7.1, Section 7.
+
+### 10.1 Create the source file
 
 ```bash
 cd ~/ns-allinone-3.40/ns-3.40/scratch
@@ -880,14 +782,14 @@ Paste:
  * TNN4113 - Task 3
  * Dumbbell Topology: TCP NewReno vs TCP Cubic over a 1 Mbps Bottleneck
  *
- *      L0 ----\                      /---- R0
- *              left-router --- bottleneck --- right-router
- *      L1 ----/    1 Mbps, 20ms, DropTail-50p           \---- R1
+ *      L0 ----\                                        /---- R0
+ *              left-router --- 1Mbps/20ms --- right-router
+ *      L1 ----/    DropTail queue, 50 packets          \---- R1
  *
  *   L0 -> R0 : TCP NewReno (BulkSend)
  *   L1 -> R1 : TCP Cubic   (BulkSend)
  *
- *   cWnd of each sender is traced to .dat files every time it changes.
+ *   cWnd of each sender traced to .dat files on every change.
  */
 
 #include "ns3/core-module.h"
@@ -921,7 +823,6 @@ static void CwndTracerCubic(uint32_t /*oldVal*/, uint32_t newVal)
 int main(int argc, char *argv[])
 {
     uint32_t simTime = 30;
-
     CommandLine cmd;
     cmd.AddValue("simTime", "Simulation time in seconds", simTime);
     cmd.Parse(argc, argv);
@@ -929,7 +830,6 @@ int main(int argc, char *argv[])
     g_renoFile.open("cwnd-newreno.dat");
     g_cubicFile.open("cwnd-cubic.dat");
 
-    // --------- Link templates ---------
     PointToPointHelper accessLink;
     accessLink.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
     accessLink.SetChannelAttribute("Delay",   StringValue("1ms"));
@@ -940,10 +840,7 @@ int main(int argc, char *argv[])
     bottleneck.SetQueue("ns3::DropTailQueue",
                         "MaxSize", StringValue("50p"));
 
-    // --------- Build dumbbell: 2 left, 2 right ---------
-    PointToPointDumbbellHelper db(2, accessLink,
-                                  2, accessLink,
-                                  bottleneck);
+    PointToPointDumbbellHelper db(2, accessLink, 2, accessLink, bottleneck);
 
     InternetStackHelper stack;
     db.InstallStack(stack);
@@ -953,7 +850,6 @@ int main(int argc, char *argv[])
         Ipv4AddressHelper("10.2.0.0", "255.255.255.0"),
         Ipv4AddressHelper("10.3.0.0", "255.255.255.0"));
 
-    // --------- Per-node TCP variant: L0 = NewReno, L1 = Cubic ---------
     TypeId tidReno  = TypeId::LookupByName("ns3::TcpNewReno");
     TypeId tidCubic = TypeId::LookupByName("ns3::TcpCubic");
 
@@ -964,7 +860,6 @@ int main(int argc, char *argv[])
 
     uint16_t port = 5001;
 
-    // --------- Sinks on right side ---------
     for (uint32_t i = 0; i < 2; ++i) {
         PacketSinkHelper sink("ns3::TcpSocketFactory",
             InetSocketAddress(Ipv4Address::GetAny(), port));
@@ -973,7 +868,6 @@ int main(int argc, char *argv[])
         s.Stop(Seconds(simTime));
     }
 
-    // --------- Sources on left side ---------
     for (uint32_t i = 0; i < 2; ++i) {
         BulkSendHelper src("ns3::TcpSocketFactory",
             InetSocketAddress(db.GetRightIpv4Address(i), port));
@@ -983,7 +877,6 @@ int main(int argc, char *argv[])
         a.Stop(Seconds(simTime));
     }
 
-    // --------- Connect cWnd tracers AFTER sockets exist ---------
     Simulator::Schedule(Seconds(1.001), [&]() {
         Config::ConnectWithoutContext(
             "/NodeList/" + std::to_string(db.GetLeft(0)->GetId()) +
@@ -1002,16 +895,14 @@ int main(int argc, char *argv[])
     g_renoFile.close();
     g_cubicFile.close();
 
-    std::cout << "Task 3 finished. Output files:\n"
+    std::cout << "Task 3 complete. Output files:\n"
               << "  cwnd-newreno.dat\n"
               << "  cwnd-cubic.dat\n";
     return 0;
 }
 ```
 
-Save.
-
-### 9.2 Build and run
+### 10.2 Build and run
 
 ```bash
 cd ~/ns-allinone-3.40/ns-3.40
@@ -1019,7 +910,7 @@ cd ~/ns-allinone-3.40/ns-3.40
 ./ns3 run scratch/task3_dumbbell
 ```
 
-After it completes, verify the output files exist:
+Verify the output files exist:
 
 ```bash
 ls -l cwnd-newreno.dat cwnd-cubic.dat
@@ -1027,19 +918,18 @@ head cwnd-newreno.dat
 head cwnd-cubic.dat
 ```
 
-Each should be hundreds-to-thousands of lines of `time\tcwnd_bytes`.
+Both should be non-empty with two columns: `time_seconds   cwnd_bytes`.
 
-### 9.3 Capture Screenshot 7.1
+### 10.3 Take Screenshot 7.1
 
-Take a screenshot of the terminal showing the `./ns3 run` command, the "Task 3 finished" output, and the `ls -l` line confirming both `.dat` files exist. Save as `screenshots/7.1_task3_run.png`.
+Screenshot your terminal showing the `./ns3 run` completion message and the `ls -l` output confirming both `.dat` files. Save as `7.1_task3_run.png`.
 
-### 9.4 Plot the cWnd comparison (Figure 7.2)
+### 10.4 Plot Figure 7.2 (cWnd comparison)
 
-Create `plot_cwnd.py` in the ns-3 root:
+**Using Python (recommended):**
 
 ```python
 #!/usr/bin/env python3
-"""plot_cwnd.py — Figure 7.2: cWnd evolution NewReno vs Cubic."""
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -1059,13 +949,7 @@ plt.savefig('cwnd_comparison.png', dpi=150)
 print('Saved cwnd_comparison.png')
 ```
 
-Run:
-
-```bash
-python3 plot_cwnd.py
-```
-
-Or use gnuplot:
+**Using gnuplot (alternative):**
 
 ```bash
 cat > plot_cwnd.gp << 'EOF'
@@ -1082,16 +966,11 @@ EOF
 gnuplot plot_cwnd.gp
 ```
 
-Result: `cwnd_comparison.png` — drop into report as Figure 7.2.
+### 10.5 Extract Table 7.1 — Drop & Recovery events
 
-### 9.5 Fill Table 7.1 — Drop & Recovery events
+Run this Python script to auto-detect the first 3 congestion drop events for each variant:
 
-This is the tricky part. You need to identify the **first 3 drop events** for each variant.
-
-A "drop event" = cWnd suddenly decreases. Detect them with this script:
-
-```bash
-python3 << 'EOF'
+```python
 import numpy as np
 
 for label, fn in [('NewReno', 'cwnd-newreno.dat'), ('Cubic', 'cwnd-cubic.dat')]:
@@ -1099,11 +978,10 @@ for label, fn in [('NewReno', 'cwnd-newreno.dat'), ('Cubic', 'cwnd-cubic.dat')]:
     t, cwnd = d[:, 0], d[:, 1]
     drops = []
     for i in range(1, len(cwnd)):
-        if cwnd[i] < cwnd[i-1] * 0.95:  # >5% sudden drop = real congestion event
-            w_max = cwnd[i-1]
-            w_min = cwnd[i]
+        if cwnd[i] < cwnd[i-1] * 0.95:     # >5% sudden drop = congestion event
+            w_max  = cwnd[i-1]
+            w_min  = cwnd[i]
             t_drop = t[i]
-            # Find recovery: time when cWnd next reaches w_max
             recovery_time = None
             for j in range(i+1, len(cwnd)):
                 if cwnd[j] >= w_max:
@@ -1114,312 +992,255 @@ for label, fn in [('NewReno', 'cwnd-newreno.dat'), ('Cubic', 'cwnd-cubic.dat')]:
                 break
     print(f"\n=== {label} ===")
     for k, (td, wmx, wmn, rt) in enumerate(drops, 1):
-        rt_str = f"{rt:.3f}s" if rt is not None else "N/A (never recovered)"
+        rt_str = f"{rt:.3f}s" if rt is not None else "N/A"
         print(f"  Drop {k}: t={td:.3f}s  W_max={int(wmx)}  W_min={int(wmn)}  Recovery={rt_str}")
-EOF
 ```
 
-Run it. Output gives you the exact numbers to put in Table 7.1.
+Copy the output numbers directly into Table 7.1 of the report.
 
-### 9.6 Cross-check analysis text (Section 7.7)
+### 10.6 Cross-check your analysis
 
-Look at your `cwnd_comparison.png`:
-- Is NewReno a classic sawtooth (linear climbs)? ✓
-- Is Cubic visibly different — flat near W_max, then steep climb? ✓
-- Does Cubic reach higher cWnd values between drops? ✓
-- Is Cubic's recovery time shorter than NewReno's in Table 7.1? ✓
+Look at your `cwnd_comparison.png` and verify:
+- NewReno shows a classic linear sawtooth pattern ✓
+- Cubic reaches higher cWnd values between drops ✓
+- Cubic's recovery time in Table 7.1 is shorter than NewReno's ✓
 
-If all four are yes → the pre-written Section 7.7 prose holds. If any answer is no, debug — most likely cause is sockets being created in a different order than expected (swap NewReno/Cubic node assignments).
+If both curves look identical — the per-node TCP variant assignment silently failed. Re-read the `Config::Set` lines in the source and confirm the node IDs are correct.
 
-### 9.7 Commit
+### 10.7 Upload to Google Drive
 
-```bash
-cp scratch/task3_dumbbell.cc  ~/TNN4113-NS3-Project/src/
-cp cwnd-newreno.dat           ~/TNN4113-NS3-Project/results/
-cp cwnd-cubic.dat             ~/TNN4113-NS3-Project/results/
-cp cwnd_comparison.png        ~/TNN4113-NS3-Project/results/
-cp plot_cwnd.py plot_cwnd.gp  ~/TNN4113-NS3-Project/scripts/
-cp screenshots/7.1*.png       ~/TNN4113-NS3-Project/screenshots/
-
-cd ~/TNN4113-NS3-Project
-git checkout student3-task3
-git add .
-git commit -m "Student 3: complete Task 3 dumbbell simulation + cWnd analysis"
-git push origin student3-task3
-```
-
-Open PR → Student 4 merges.
+Upload all files to their respective folders.
 
 ---
 
-## 10. Phase 5 — Synthesis & Report Assembly (Student 4)
+## 11. Phase 5 — Report Assembly (Student 4)
 
-You don't do simulation work. You produce the final deliverable.
+You do not run any simulation. Your job is to produce the final, complete, submission-ready report.
 
-### 10.1 Pull everything from the other students
+### 11.1 While others are running simulations (Days 1–3)
 
-```bash
-cd ~/TNN4113-NS3-Project
-git checkout main
-git pull
-# Merge each branch via GitHub PR UI, or:
-git merge student1-task1
-git merge student2-task2
-git merge student3-task3
-git push origin main
-```
+Draft these sections — they do not require any simulation data:
 
-After merging you should have:
-- `src/` — all 3 .cc files
-- `results/` — all CSV, XML, DAT, PNG files
-- `screenshots/` — all 4 mandatory screenshots
-- `scripts/` — sweep, plotting helpers
+- **Section 1** — Executive Summary (leave result sentences as placeholders for now)
+- **Section 2** — Introduction (already written in template, fill names)
+- **Section 3** — Background and Theoretical Framework (already complete in template)
+- **Section 4** — Methodology (fill the environment table using the spec at the top of this guide)
 
-### 10.2 Open the report template
+### 11.2 Draw the 3 topology diagrams
 
-Open `TNN4113_Project_Report.docx` in Word (or LibreOffice).
+Go to **https://app.diagrams.net** (free, no login needed).
 
-### 10.3 Replace ALL placeholder text — systematic checklist
+**Figure 5.1 — P2P Topology:**
+- Two circles: "Node 0 (TCP Source / BulkSend)" and "Node 1 (TCP Sink)"
+- One connecting line labelled: "5 Mbps · variable delay · variable error rate"
 
-Search for each marker and replace:
+**Figure 6.1 — CSMA Topology:**
+- Ten circles in a row labelled N0 through N9
+- One horizontal line underneath all of them (the shared channel)
+- N0 coloured differently, labelled "SINK"
+- Channel labelled: "100 Mbps, 6560 ns"
+
+**Figure 7.1 — Dumbbell Topology:**
+- Left side: L0, L1 connecting to "Left Router"
+- Middle: "Left Router" → "Right Router" labelled "1 Mbps / 20 ms / DropTail 50p"
+- Right side: "Right Router" → R0, R1
+- Access links labelled: "10 Mbps / 1 ms"
+
+Export each as PNG and insert into the report.
+
+### 11.3 Day 4 — Collect and merge
+
+Once all 3 teammates have uploaded to Google Drive:
+
+1. Download all files from the Drive folder
+2. Open `TNN4113_Project_Report.docx`
+3. Replace every `[INSERT]` and `>>> PLACEHOLDER <<<` using this checklist:
 
 | Find | Replace with |
 |---|---|
-| `[INSERT NAME]` (8 occurrences) | Real student names |
-| `[INSERT ID]` (4 occurrences) | Real matric IDs |
-| `>>> PLACEHOLDER: INSERT UNIVERSITY ...<<<` | Paste university logo image |
-| `>>> PLACEHOLDER: INSERT FIGURE 5.1 ...<<<` | Insert hand-drawn or Visio P2P diagram |
-| `>>> PLACEHOLDER: INSERT SCREENSHOT 5.1 ...<<<` | Insert `screenshots/5.1_task1_run.png` |
-| `>>> PLACEHOLDER: INSERT FIGURE 5.2 ...<<<` | Insert `results/figure_5_2.png` |
-| `>>> PLACEHOLDER: INSERT FIGURE 6.1 ...<<<` | Insert hand-drawn or Visio CSMA diagram |
-| `>>> PLACEHOLDER: INSERT SCREENSHOT 6.1 ...<<<` | Insert `screenshots/6.1_netanim.png` |
-| `>>> PLACEHOLDER: INSERT SCREENSHOT 6.2 ...<<<` | Insert `screenshots/6.2_task2_terminal.png` |
-| `>>> PLACEHOLDER: INSERT FIGURE 6.2 ...<<<` | Insert `results/figure_6_2.png` |
-| `>>> PLACEHOLDER: INSERT FIGURE 7.1 ...<<<` | Insert hand-drawn or Visio Dumbbell diagram |
-| `>>> PLACEHOLDER: INSERT FIGURE 7.2 ...<<<` | Insert `results/cwnd_comparison.png` |
-| `>>> PLACEHOLDER: INSERT SCREENSHOT 7.1 ...<<<` | Insert `screenshots/7.1_task3_run.png` |
-| Every `[INSERT]` cell in Tables 5.1, 5.2, 6.1, 6.2, 7.1 | Real numbers from CSV/logs |
-| Every `[INSERT approx X.XX]` hint | Either delete or replace with real number |
+| `[INSERT NAME]` × 8 | Real student names |
+| `[INSERT ID]` × 4 | Real matric IDs |
+| `>>> PLACEHOLDER: INSERT FIGURE 5.1 <<<` | Figure 5.1 PNG |
+| `>>> PLACEHOLDER: INSERT SCREENSHOT 5.1 <<<` | `5.1_task1_run.png` |
+| `>>> PLACEHOLDER: INSERT FIGURE 5.2 <<<` | `figure_5_2.png` |
+| `>>> PLACEHOLDER: INSERT FIGURE 6.1 <<<` | Figure 6.1 PNG |
+| `>>> PLACEHOLDER: INSERT SCREENSHOT 6.1 <<<` | `6.1_netanim.png` |
+| `>>> PLACEHOLDER: INSERT SCREENSHOT 6.2 <<<` | `6.2_task2_terminal.png` |
+| `>>> PLACEHOLDER: INSERT FIGURE 6.2 <<<` | `figure_6_2.png` |
+| `>>> PLACEHOLDER: INSERT FIGURE 7.1 <<<` | Figure 7.1 PNG |
+| `>>> PLACEHOLDER: INSERT FIGURE 7.2 <<<` | `cwnd_comparison.png` |
+| `>>> PLACEHOLDER: INSERT SCREENSHOT 7.1 <<<` | `7.1_task3_run.png` |
+| All `[INSERT]` cells in Tables 5.1, 5.2, 6.1, 6.2, 7.1 | Real numbers from CSV / logs |
 
-**Pro tip:** use Word's Find & Replace (Ctrl+H). Search for `[INSERT` to find every remaining placeholder. After you finish, that search must return zero results.
+Use Word's **Find & Replace (Ctrl+H)** and search for `[INSERT` — it must return zero results when you are done.
 
-### 10.4 Sketch the three topology diagrams (Figures 5.1, 6.1, 7.1)
+### 11.4 Write Section 8 (Cross-Task Synthesis)
 
-Easiest path: use **draw.io** (free, web-based at https://app.diagrams.net):
+Verify the three-layer summary table matches your real results:
+- Task 1 row: "Throughput ∝ 1/RTT and ≈1/√p" — confirmed by Tables 5.1/5.2?
+- Task 2 row: "PDR drops with each new sender" — confirmed by Table 6.1?
+- Task 3 row: "Cubic more aggressive, recovers faster" — confirmed by Table 7.1?
 
-- **Figure 5.1 — P2P:** two circles labelled "Node 0 (TCP Source)" and "Node 1 (TCP Sink)", connected by a line labelled "5 Mbps, variable delay, variable error rate"
-- **Figure 6.1 — CSMA:** ten circles in a row (N0..N9), all connected to one horizontal line (the shared channel); colour N0 differently and label it "SINK"
-- **Figure 7.1 — Dumbbell:** L0, L1 on left → left router → bottleneck (label "1 Mbps, 20ms, DropTail 50p") → right router → R0, R1 on right; label access links "10 Mbps, 1 ms"
+Update any text that contradicts the real numbers.
 
-Export each as PNG, insert into Word at the corresponding placeholder.
+### 11.5 Fill Peer Evaluation (Section 10)
 
-### 10.5 Confirm Section 8 synthesis table values
+Fill in real names and adjust contribution percentages if the workload was uneven. Everyone signs.
 
-Table in Section 8.1 references the headline result from each task. Verify the phrasing matches your actual data:
-- Task 1 "Throughput falls as 1/RTT and ≈1/√p" — your Tables 5.1 and 5.2 should support this
-- Task 2 "PDR drops with each new sender" — your Table 6.1 should show this
-- Task 3 "Cubic more aggressive, recovers faster" — your Table 7.1 should confirm this
-
-### 10.6 Fill the Peer Evaluation / Contribution Sheet (Section 10)
-
-The pre-filled 25%/25%/25%/25% split is fine for an evenly-distributed team. Replace `[INSERT NAME 1]`...`[INSERT NAME 4]` with real names and update specific contributions if anyone went above/beyond.
-
-Each member signs (digital signature image, or print → sign → scan).
-
-### 10.7 Generate the final PDF
-
-In Word: **File → Export → Create PDF/XPS** → save as `TNN4113_Project_Report.pdf` in your final submission folder.
-
-### 10.8 Assemble the submission package
-
-Create a clean folder:
+### 11.6 Assemble submission package
 
 ```bash
-mkdir -p ~/Group4_Submission
-cd ~/Group4_Submission
+mkdir -p ~/Group4_Submission/source_code
+mkdir -p ~/Group4_Submission/trace_outputs
+mkdir -p ~/Group4_Submission/plots
+mkdir -p ~/Group4_Submission/screenshots
 
-# Source code
-mkdir source_code
-cp ~/TNN4113-NS3-Project/src/*.cc source_code/
+cp task1_p2p.cc task2_csma.cc task3_dumbbell.cc  ~/Group4_Submission/source_code/
+cp task1_results.csv task2_csma.xml               ~/Group4_Submission/trace_outputs/
+cp cwnd-newreno.dat cwnd-cubic.dat                ~/Group4_Submission/trace_outputs/
+cp figure_5_2.png figure_6_2.png cwnd_comparison.png ~/Group4_Submission/plots/
+cp 5.1_task1_run.png 6.1_netanim.png \
+   6.2_task2_terminal.png 7.1_task3_run.png       ~/Group4_Submission/screenshots/
+cp TNN4113_Project_Report.docx                    ~/Group4_Submission/
+cp TNN4113_Project_Report.pdf                     ~/Group4_Submission/
 
-# Trace and data outputs
-mkdir trace_outputs
-cp ~/TNN4113-NS3-Project/results/task1_results.csv trace_outputs/
-cp ~/TNN4113-NS3-Project/results/task2_csma.xml trace_outputs/
-cp ~/TNN4113-NS3-Project/results/cwnd-newreno.dat trace_outputs/
-cp ~/TNN4113-NS3-Project/results/cwnd-cubic.dat trace_outputs/
-
-# Plots
-mkdir plots
-cp ~/TNN4113-NS3-Project/results/figure_5_2.png plots/
-cp ~/TNN4113-NS3-Project/results/figure_6_2.png plots/
-cp ~/TNN4113-NS3-Project/results/cwnd_comparison.png plots/
-
-# Screenshots
-mkdir screenshots
-cp ~/TNN4113-NS3-Project/screenshots/*.png screenshots/
-
-# Report
-cp ~/Documents/TNN4113_Project_Report.docx .
-cp ~/Documents/TNN4113_Project_Report.pdf .
-
-# Zip it
 cd ~
 zip -r Group4_TNN4113_Submission.zip Group4_Submission/
 ```
 
-You now have one zip file ready to upload to eLeap.
+---
+
+## 12. Phase 6 — Final Review & Submission
+
+### 12.1 Group review meeting (Day 5 morning)
+
+Video call, screen-share the PDF:
+- Student 1 reads Sections 6, 7, 8
+- Student 2 reads Sections 5, 7, 8
+- Student 3 reads Sections 5, 6, 8
+- Student 4 moderates and applies fixes live
+
+### 12.2 Upload to eLeap
+
+1. Log in to eLeap
+2. Navigate to TNN4113 project submission
+3. Upload `Group4_TNN4113_Submission.zip`
+4. Confirm upload success
+5. Screenshot the confirmation page
+
+**Do this before 5 PM on 21 May — never at the last minute.**
 
 ---
 
-## 11. Phase 6 — Final Review & Submission (Whole Team)
+## 13. Troubleshooting
 
-### 11.1 Cross-review meeting (everyone, evening of Day 5)
+**`E: Unable to locate package sqlite`**
+Remove `sqlite` from the apt command. Use `sqlite3` and `libsqlite3-dev` instead — both are already in the corrected command in Section 4.4.
 
-Sit on a Discord/Zoom call, screen-share the PDF. Each member proof-reads the other three sections:
+**`Note, selecting 'libgcrypt20-dev' instead of 'libgcrypt-dev'`**
+This is not an error. Ubuntu 22.04 renamed the package. The corrected command in Section 4.4 uses `libgcrypt20-dev` directly.
 
-- **Student 1** reads Sections 6, 7, 8 — calls out any errors
-- **Student 2** reads Sections 5, 7, 8 — calls out any errors
-- **Student 3** reads Sections 5, 6, 8 — calls out any errors
-- **Student 4** moderates and applies fixes in real-time
-
-### 11.2 Final checks
-
-Use [Submission Checklist](#13-submission-checklist) below.
-
-### 11.3 Upload
-
-1. Log in to eLeap.
-2. Navigate to the TNN4113 project submission area.
-3. Upload `Group4_TNN4113_Submission.zip`.
-4. Confirm upload succeeded.
-5. Screenshot the confirmation page for proof.
-
-**Do this before 5 PM on submission day — never on the deadline minute.**
-
----
-
-## 12. Troubleshooting
-
-### 12.1 `./ns3 run hello-simulator` produces an error
-
-Re-run the configure step:
+**`./ns3 run hello-simulator` gives an error**
+Re-run configure:
 ```bash
 ./ns3 clean
 ./ns3 configure --enable-examples --enable-tests
 ./ns3 build
 ```
 
-### 12.2 Build error: `error: 'CommandLine' was not declared`
-
-You forgot to include `"ns3/core-module.h"` at the top of your .cc file.
-
-### 12.3 NetAnim won't open the XML
-
-- Make sure the XML file size is non-zero (`ls -l task2_csma.xml`).
-- Make sure your NetAnim version matches the bundled one (3.108 with ns-3.40).
-- If using WSL: ensure WSLg is enabled (`wsl --update` in PowerShell).
-
-### 12.4 `cwnd-newreno.dat` is empty
-
-The tracer hook fires only after the TCP socket exists. The code uses `Simulator::Schedule(Seconds(1.001), ...)`. If your sources start at `Seconds(1.0)`, the socket may not exist yet at exactly 1.001s on slow machines. Push the schedule to `Seconds(1.5)` or push source start to `Seconds(0.5)` to widen the gap.
-
-### 12.5 Task 1 sweep script never finishes
-
-The script runs 20 simulations sequentially, each ≈30 s of simulated time but only seconds of wall-clock time. If it's hanging on one combination, abort with Ctrl+C, run that single combination by hand to see the error.
-
-### 12.6 Throughput numbers look identical for different runs
-
-You're not changing the RNG seed. For repeatability checks, append `--RngRun=2` (then 3, 4, 5) to a sweep variant.
-
-### 12.7 NetAnim shows nodes overlapping
-
-You forgot `anim.SetConstantPosition(...)` for each node, or you set them all to the same coordinate. The code above lays them out in a horizontal row spaced 5 metres apart.
-
-### 12.8 Cubic and NewReno curves look the same
-
-Verify your per-node `Config::Set` line ran *before* the sockets were created. The pattern `/NodeList/<id>/$ns3::TcpL4Protocol/SocketType` must use the dollar-sign aggregate form. Also verify ns-3.40 has TcpCubic — list with:
-```bash
-grep -r "TcpCubic" src/internet/model/ | head -5
+**`cwnd-newreno.dat` is empty after Task 3 run**
+The tracer hook fires after socket creation. Push the schedule to `Seconds(1.5)`:
+```cpp
+Simulator::Schedule(Seconds(1.5), [&]() { ... });
 ```
 
-### 12.9 Git push asks for password (GitHub deprecated passwords)
+**NetAnim window does not open on WSL2**
+Run `wsl --update` in PowerShell, then reopen Ubuntu and try again.
 
-Use a Personal Access Token instead:
-1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token (classic)
-2. Scope: `repo`
-3. Copy the token, use it as your password when prompted
+**Both cWnd curves in Task 3 look identical**
+The `Config::Set` per-node TCP variant assignment failed silently. Print the node IDs to confirm:
+```cpp
+std::cout << "Left 0 ID = " << db.GetLeft(0)->GetId() << "\n";
+std::cout << "Left 1 ID = " << db.GetLeft(1)->GetId() << "\n";
+```
+Then verify those IDs match what you pass to `Config::Set`.
 
-Or set up SSH keys (`ssh-keygen -t ed25519` → add to GitHub).
+**Task 1 sweep script hangs on one combination**
+Abort with Ctrl+C, run that single combination manually to see the error message:
+```bash
+./ns3 run "scratch/task1_p2p --delay=60ms --errRate=0.05"
+```
 
 ---
 
-## 13. Submission Checklist
-
-Before uploading, every box must be ticked.
+## 14. Submission Checklist
 
 ### Source code
-- [ ] `task1_p2p.cc` — compiles cleanly on ns-3.40
-- [ ] `task2_csma.cc` — compiles cleanly on ns-3.40
-- [ ] `task3_dumbbell.cc` — compiles cleanly on ns-3.40
-- [ ] All files have a header comment with task number and student name
-- [ ] Code is commented (not just stripped down)
+- [ ] `task1_p2p.cc` — compiles on NS-3.40, runs cleanly
+- [ ] `task2_csma.cc` — compiles on NS-3.40, runs cleanly
+- [ ] `task3_dumbbell.cc` — compiles on NS-3.40, runs cleanly
+- [ ] All files have header comment with task number and student name
 
 ### Data outputs
-- [ ] `task1_results.csv` exists with 20 rows of real data
-- [ ] `task2_csma.xml` exists and opens in NetAnim
-- [ ] `cwnd-newreno.dat` and `cwnd-cubic.dat` exist and contain numeric data
-- [ ] `figure_5_2.png` — Throughput vs Delay & Error Rate
-- [ ] `figure_6_2.png` — CSMA aggregate throughput & PDR
-- [ ] `cwnd_comparison.png` — NewReno vs Cubic cWnd
+- [ ] `task1_results.csv` — 20 rows of real simulation data
+- [ ] `task2_csma.xml` — generated from 5-sender run, opens in NetAnim
+- [ ] `cwnd-newreno.dat` — non-empty, two columns
+- [ ] `cwnd-cubic.dat` — non-empty, two columns
+
+### Plots (generated, not screenshots)
+- [ ] `figure_5_2.png` — Throughput vs Delay & Error Rate, 4 curves
+- [ ] `figure_6_2.png` — CSMA aggregate throughput & PDR bar chart
+- [ ] `cwnd_comparison.png` — NewReno vs Cubic cWnd over 30 s
 
 ### Screenshots (4 mandatory)
-- [ ] Screenshot 5.1 — Task 1 successful run
-- [ ] Screenshot 6.1 — NetAnim CSMA visualization
-- [ ] Screenshot 6.2 — Task 2 terminal output
-- [ ] Screenshot 7.1 — Task 3 successful run
+- [ ] `5.1_task1_run.png` — Task 1 terminal run
+- [ ] `6.1_netanim.png` — NetAnim CSMA animation with arrows
+- [ ] `6.2_task2_terminal.png` — Task 2 FlowMonitor 5-sender output
+- [ ] `7.1_task3_run.png` — Task 3 terminal + `ls -l` of .dat files
+
+### Topology diagrams (hand-drawn / draw.io)
+- [ ] Figure 5.1 — P2P topology
+- [ ] Figure 6.1 — 10-node CSMA LAN
+- [ ] Figure 7.1 — Dumbbell topology
 
 ### Report
-- [ ] Every `[INSERT]` table cell replaced with a real number
-- [ ] Every `>>> PLACEHOLDER <<<` block replaced with a figure or screenshot
-- [ ] All four student names + matric IDs filled on cover page
-- [ ] All four signatures captured on Declaration of Authorship
-- [ ] Peer Evaluation table filled with real names and percentages summing to 100%
-- [ ] All four signatures on Peer Evaluation
-- [ ] References section preserved (no `[INSERT]` items)
-- [ ] Final PDF exported and ZIP package built
+- [ ] Environment table (Section 4.1) filled with exact spec from this guide
+- [ ] Zero remaining `[INSERT]` cells in any table
+- [ ] Zero remaining `>>> PLACEHOLDER <<<` blocks
+- [ ] All 4 names + matric IDs on cover page and Declaration
+- [ ] Peer Evaluation signed by all 4 members
+- [ ] PDF exported
 
-### Logistics
+### Submission
 - [ ] ZIP uploaded to eLeap before 21 May 2026 deadline
-- [ ] Upload confirmation screenshot saved
-- [ ] All team members have a personal backup copy of the ZIP
+- [ ] Confirmation screenshot saved
+- [ ] All members have a personal backup copy
 
 ---
 
-## Quick Reference — Single-Command Cheat Sheet
-
-For each student to keep open in a second terminal:
+## Quick Command Reference
 
 ```bash
-# Student 1 — Task 1 single run
-./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.01"
+# Everyone — verify NS-3.40
+cd ~/ns-allinone-3.40/ns-3.40 && ./ns3 --version
 
-# Student 1 — Task 1 full sweep
+# Student 1 — single test run
+./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.00"
+
+# Student 1 — full 20-combo sweep
 ./task1_sweep.sh
 
-# Student 2 — Task 2 all three scenarios
-for n in 1 3 5; do ./ns3 run "scratch/task2_csma --nSenders=$n" | tee task2_n${n}.log; done
+# Student 2 — all three CSMA scenarios
+for n in 1 3 5; do
+  ./ns3 run "scratch/task2_csma --nSenders=$n" | tee task2_n${n}.log
+done
 
-# Student 2 — Open NetAnim
-~/ns-allinone-3.40/netanim-3.108/NetAnim
+# Student 2 — open NetAnim
+NetAnim
 
-# Student 3 — Task 3 run + plot
+# Student 3 — run dumbbell + plot
 ./ns3 run scratch/task3_dumbbell && python3 plot_cwnd.py
 
-# Student 4 — assemble submission
-cd ~/Group4_Submission && zip -r ../Group4_TNN4113_Submission.zip .
+# Student 4 — assemble zip
+cd ~ && zip -r Group4_TNN4113_Submission.zip Group4_Submission/
 ```
-
----
-
-**You've got this. Good luck.**
