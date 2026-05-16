@@ -147,7 +147,7 @@ sudo apt install -y \
 Then install Python plotting libraries:
 
 ```bash
-pip3 install --user matplotlib numpy
+sudo apt install python3-matplotlib python3-numpy -y
 ```
 
 ### 4.5 Verify toolchain
