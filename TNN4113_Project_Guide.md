@@ -27,7 +27,7 @@
 
 | Item | Version / Value |
 |---|---|
-| Operating System | **Ubuntu 24.04 LTS** (WSL2 or native) |
+| Operating System | **Ubuntu 24.04 LTS** (VirtualBox) |
 | ns-3 release | **ns-3.43 or ns-3.47** — pick one, all must match |
 | Compiler | **g++ 13.3.0** with C++17 |
 | Build system | CMake **3.28.3** via `./ns3` wrapper |
@@ -46,7 +46,7 @@
 
 1. [Team Roles & Responsibilities](#1-team-roles--responsibilities)
 2. [Recommended Timeline (5 Days)](#2-recommended-timeline-5-days)
-3. [GitHub Repository Setup & Workflow](#3-github-repository-setup--workflow)
+3. [Repository](#3-repository)
 4. [Phase 0 — System Setup (Day 1, Everyone)](#4-phase-0--system-setup-day-1-everyone)
 5. [Phase 1 — Install NS-3 (Day 1, Everyone)](#5-phase-1--install-ns-3-day-1-everyone)
 6. [Phase 2 — Verify Environment (Day 1, Everyone)](#6-phase-2--verify-environment-day-1-everyone)
@@ -86,33 +86,13 @@
 
 ---
 
-## 3. GitHub Repository Setup & Workflow
-
-### 3.1 Repository (already created by Clarence)
-
-The repo is live at:
+## 3. Repository
 
 ```
 https://github.com/chuanheng02/TNN4113-Network-Performance-Analysis.git
 ```
 
-Clarence needs to go to **Settings → Collaborators → Add people** and invite Brendan, Xavier, and Ming Zin by their GitHub usernames.
-
-### 3.2 Everyone clones the repo (Day 1)
-
-```bash
-# Set your identity first (do this once)
-git config --global user.name "Brendan Chan Kah Le"    # change to your own name
-git config --global user.email "your@email.com"
-
-# Clone
-git clone https://github.com/chuanheng02/TNN4113-Network-Performance-Analysis.git
-cd TNN4113-Network-Performance-Analysis
-```
-
-### 3.3 Repository folder structure
-
-Ming Zin creates this structure and pushes it on Day 1:
+Use this folder structure inside the repo:
 
 ```
 TNN4113-Network-Performance-Analysis/
@@ -144,180 +124,34 @@ TNN4113-Network-Performance-Analysis/
     └── TNN4113_Project_Report.pdf   ← Ming Zin
 ```
 
-### 3.4 Branching strategy
-
-Each simulation student works on their own branch. Ming Zin works on `main`.
-
-```
-main                    ← Ming Zin's branch (report + merges)
-├── feat/task1-brendan  ← Brendan opens PR when done
-├── feat/task2-xavier   ← Xavier opens PR when done
-└── feat/task3-clarence ← Clarence opens PR when done
-```
-
-### 3.5 Each student's Git workflow
-
-**Brendan (S1):**
-```bash
-git checkout -b feat/task1-brendan
-
-cp ~/ns-allinone-3.43/ns-3.43/scratch/task1_p2p.cc     src/
-cp ~/ns-allinone-3.43/ns-3.43/task1_sweep.sh            scripts/
-cp ~/ns-allinone-3.43/ns-3.43/plot_task1.py             scripts/
-cp ~/ns-allinone-3.43/ns-3.43/task1_results.csv         results/
-cp ~/ns-allinone-3.43/ns-3.43/figure_5_2.png            results/
-cp ~/path/to/5.1_task1_run.png                          screenshots/
-
-git add .
-git commit -m "feat(task1): add P2P simulation, sweep script, and results
-
-- Add task1_p2p.cc (point-to-point topology, BulkSend/TCP NewReno)
-- Add task1_sweep.sh (20-combination delay x error rate sweep)
-- Add task1_results.csv (simulation output, 20 rows)
-- Add figure_5_2.png (throughput vs delay & error rate plot)
-- Add 5.1_task1_run.png (terminal screenshot)"
-
-git push origin feat/task1-brendan
-# Then open a Pull Request on GitHub: feat/task1-brendan → main
-```
-
-**Xavier (S2):**
-```bash
-git checkout -b feat/task2-xavier
-
-cp ~/ns-allinone-3.43/ns-3.43/scratch/task2_csma.cc     src/
-cp ~/ns-allinone-3.43/ns-3.43/task2_csma_5senders.xml   results/task2_csma.xml
-cp ~/ns-allinone-3.43/ns-3.43/task2_n*.log              results/
-cp ~/ns-allinone-3.43/ns-3.43/plot_task2.py             scripts/
-cp ~/ns-allinone-3.43/ns-3.43/figure_6_2.png            results/
-cp ~/path/to/6.1_netanim.png                            screenshots/
-cp ~/path/to/6.2_task2_terminal.png                     screenshots/
-
-git add .
-git commit -m "feat(task2): add CSMA LAN simulation, NetAnim trace, and results
-
-- Add task2_csma.cc (10-node CSMA, 1/3/5 sender scenarios)
-- Add task2_csma.xml (NetAnim trace, 5-sender run)
-- Add task2_n1/n3/n5.log (FlowMonitor output logs)
-- Add figure_6_2.png (aggregate throughput & PDR bar chart)
-- Add 6.1_netanim.png (NetAnim screenshot)
-- Add 6.2_task2_terminal.png (terminal FlowMonitor output)"
-
-git push origin feat/task2-xavier
-# Then open a Pull Request on GitHub: feat/task2-xavier → main
-```
-
-**Clarence (S3):**
-```bash
-git checkout -b feat/task3-clarence
-
-cp ~/ns-allinone-3.43/ns-3.43/scratch/task3_dumbbell.cc src/
-cp ~/ns-allinone-3.43/ns-3.43/cwnd-newreno.dat          results/
-cp ~/ns-allinone-3.43/ns-3.43/cwnd-cubic.dat            results/
-cp ~/ns-allinone-3.43/ns-3.43/cwnd_comparison.png       results/
-cp ~/ns-allinone-3.43/ns-3.43/plot_cwnd.py              scripts/
-cp ~/path/to/7.1_task3_run.png                          screenshots/
-
-git add .
-git commit -m "feat(task3): add dumbbell simulation, cWnd traces, and analysis
-
-- Add task3_dumbbell.cc (dumbbell topology, NewReno vs Cubic)
-- Add cwnd-newreno.dat (NewReno congestion window time-series)
-- Add cwnd-cubic.dat (Cubic congestion window time-series)
-- Add cwnd_comparison.png (cWnd evolution plot, 30s)
-- Add 7.1_task3_run.png (terminal screenshot)"
-
-git push origin feat/task3-clarence
-# Then open a Pull Request on GitHub: feat/task3-clarence → main
-```
-
-### 3.6 Ming Zin merges all PRs (Day 4)
-
-1. Go to GitHub → Pull Requests
-2. Review and merge `feat/task1-brendan` → `main`
-3. Review and merge `feat/task2-xavier` → `main`
-4. Review and merge `feat/task3-clarence` → `main`
-5. Pull the merged main locally:
-
-```bash
-git checkout main
-git pull
-```
-
-Then add the final report:
-
-```bash
-cp ~/path/to/TNN4113_Project_Report.docx  report/
-cp ~/path/to/TNN4113_Project_Report.pdf   report/
-
-git add .
-git commit -m "docs(report): final merged report with all results and diagrams
-
-- Update Section 4.1 environment table to Ubuntu 24.04 / g++ 13.3.0
-- Insert topology diagrams Figures 5.1, 6.1, 7.1
-- Fill all [INSERT] cells in Tables 5.1, 5.2, 6.1, 6.2, 7.1
-- Replace all screenshot and figure placeholders
-- Write Section 8 cross-task synthesis
-- Write Sections 9 and 10 (conclusions, peer evaluation)
-- Export TNN4113_Project_Report.pdf"
-
-git push origin main
-```
-
-Final submission commit after zipping:
-
-```bash
-git commit -m "chore(submission): assemble Group16_TNN4113_Submission.zip
-
-- Collect source code, trace outputs, plots, screenshots
-- Final proofread complete, zero [INSERT] remaining
-- Zip ready for eLeap upload"
-
-git push origin main
-```
-
-### 3.7 GitHub authentication tip
-
-If Git asks for a password, GitHub no longer accepts account passwords — use a **Personal Access Token**:
-
-1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token
-2. Scope: tick `repo`
-3. Copy the token and paste it as your password when prompted
-
-Or set up SSH keys (more permanent):
-```bash
-ssh-keygen -t ed25519 -C "your@email.com"
-cat ~/.ssh/id_ed25519.pub   # copy this output
-# Paste into: GitHub → Settings → SSH and GPG keys → New SSH key
-```
-
 ---
 
 ## 4. Phase 0 — System Setup (Day 1, Everyone)
 
-### 4.1 If you are on Windows — Install WSL2 + Ubuntu 24.04
+### 4.1 You are all on Ubuntu 24.04 via Oracle VirtualBox
 
-Open **PowerShell as Administrator:**
+No extra setup needed. Just open your Ubuntu VM and proceed from Section 4.2.
 
-```powershell
-wsl --install -d Ubuntu-24.04
+Make sure your VM has enough resources before starting the NS-3 build — it is CPU-heavy:
+
+- **RAM:** at least 4 GB allocated to the VM (8 GB recommended)
+- **CPU cores:** at least 2 (4 recommended)
+- **Disk space:** at least 20 GB free inside the VM
+
+To check in your VM:
+```bash
+free -h        # check available RAM
+nproc          # check CPU cores available
+df -h ~        # check free disk space
 ```
 
-Reboot when prompted. Open Ubuntu from the Start menu, create a UNIX username and password. Then update WSL:
-
-```powershell
-wsl --update
-```
-
-### 4.2 If you are on native Ubuntu 24.04 — Skip to 4.3
-
-### 4.3 Update your system
+### 4.2 Update your system
 
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
 
-### 4.4 Install all required packages
+### 4.3 Install all required packages
 
 > **This command is updated for Ubuntu 24.04.** Key changes from the old 22.04 command:
 > - `qtchooser` removed — dropped from Ubuntu 24.04
@@ -340,7 +174,7 @@ sudo apt install -y \
   python3-matplotlib python3-numpy
 ```
 
-### 4.5 Verify toolchain
+### 4.4 Verify toolchain
 
 Run each command and confirm the output matches:
 
@@ -482,22 +316,17 @@ A `NetAnim` executable will appear in that folder.
 
 ### 7.2 Launch NetAnim
 
-**On native Ubuntu:**
+Since you are all on Ubuntu in VirtualBox, the GUI works natively:
+
 ```bash
 ./NetAnim
 ```
 
-**On WSL2 (Windows 11):** WSLg supports Linux GUI apps natively. Just run:
-```bash
-./NetAnim
-```
+A window will appear. If nothing happens, make sure your VM has **Guest Additions** installed (it enables proper display drivers). Install with:
 
-A window should appear. If it does not, run `wsl --update` in PowerShell and try again.
-
-**On WSL2 (Windows 10):** Install VcXsrv on Windows, then:
 ```bash
-export DISPLAY=:0
-./NetAnim
+sudo apt install -y virtualbox-guest-x11
+reboot
 ```
 
 ### 7.3 Add NetAnim to your PATH (convenience)
@@ -763,17 +592,7 @@ Open `task1_results.csv`. Pick rows to populate:
 
 ### 8.7 Push to GitHub
 
-When all files are ready, commit and push your branch (see Section 3.5 for full commands):
-
-```bash
-cd ~/TNN4113-Network-Performance-Analysis
-git checkout feat/task1-brendan
-git add .
-git commit -m "feat(task1): add P2P simulation, sweep script, and results ..."
-git push origin feat/task1-brendan
-```
-
-Then open a **Pull Request** on GitHub: `feat/task1-brendan` → `main`.
+Commit and push your branch, then open a Pull Request into `main`.
 
 ---
 
@@ -988,15 +807,7 @@ print('Saved figure_6_2.png')
 
 ### 9.7 Push to GitHub
 
-```bash
-cd ~/TNN4113-Network-Performance-Analysis
-git checkout feat/task2-xavier
-git add .
-git commit -m "feat(task2): add CSMA LAN simulation, NetAnim trace, and results ..."
-git push origin feat/task2-xavier
-```
-
-Then open a **Pull Request** on GitHub: `feat/task2-xavier` → `main`.
+Commit and push your branch, then open a Pull Request into `main`.
 
 ---
 
@@ -1255,15 +1066,7 @@ std::cout << "Left 1 ID = " << db.GetLeft(1)->GetId() << "\n";
 
 ### 10.7 Push to GitHub
 
-```bash
-cd ~/TNN4113-Network-Performance-Analysis
-git checkout feat/task3-clarence
-git add .
-git commit -m "feat(task3): add dumbbell simulation, cWnd traces, and analysis ..."
-git push origin feat/task3-clarence
-```
-
-Then open a **Pull Request** on GitHub: `feat/task3-clarence` → `main`.
+Commit and push your branch, then open a Pull Request into `main`.
 
 ---
 
@@ -1304,15 +1107,14 @@ Export each as PNG and insert into the report.
 
 ### 11.3 Day 4 — Collect and merge
 
-Once all 3 teammates have opened their Pull Requests:
+Once all 3 teammates have merged their PRs into `main`, pull the latest:
 
-1. Merge each PR on GitHub (Section 3.6)
-2. Pull the updated main locally:
 ```bash
 git checkout main
 git pull
 ```
-3. Open `TNN4113_Project_Report.docx`
+
+Then open `TNN4113_Project_Report.docx`.
 3. Replace every `[INSERT]` and `>>> PLACEHOLDER <<<` using this checklist:
 
 | Find | Replace with |
@@ -1433,8 +1235,12 @@ Push the schedule to `Seconds(1.5)`:
 Simulator::Schedule(Seconds(1.5), [&]() { ... });
 ```
 
-**NetAnim window does not open on WSL2**
-Run `wsl --update` in PowerShell, reopen Ubuntu and try again.
+**NetAnim window does not open**
+Make sure VirtualBox Guest Additions is installed — it provides the display drivers needed for GUI apps:
+```bash
+sudo apt install -y virtualbox-guest-x11
+reboot
+```
 
 **Both cWnd curves in Task 3 look identical**
 Print node IDs to confirm the Config::Set assignments are correct:
@@ -1500,23 +1306,14 @@ Abort with Ctrl+C and run that combination manually:
 ## Quick Command Reference
 
 ```bash
-# Everyone — verify NS-3.43
+# Everyone — verify NS-3 version
 cd ~/ns-allinone-3.43/ns-3.43 && ./ns3 --version
-
-# Everyone — clone repo (Day 1)
-git clone https://github.com/chuanheng02/TNN4113-Network-Performance-Analysis.git
-
-# Brendan (S1) — create branch
-git checkout -b feat/task1-brendan
 
 # Brendan (S1) — single test run
 ./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.00"
 
 # Brendan (S1) — full 20-combo sweep
 ./task1_sweep.sh
-
-# Xavier (S2) — create branch
-git checkout -b feat/task2-xavier
 
 # Xavier (S2) — all three CSMA scenarios
 for n in 1 3 5; do
@@ -1526,14 +1323,8 @@ done
 # Xavier (S2) — open NetAnim
 NetAnim
 
-# Clarence (S3) — create branch
-git checkout -b feat/task3-clarence
-
 # Clarence (S3) — run dumbbell + plot
 ./ns3 run scratch/task3_dumbbell && python3 plot_cwnd.py
-
-# Ming Zin (S4) — merge all PRs then pull
-git checkout main && git pull
 
 # Ming Zin (S4) — assemble zip
 cd ~ && zip -r Group16_TNN4113_Submission.zip Group16_Submission/
