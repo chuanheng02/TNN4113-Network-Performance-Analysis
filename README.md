@@ -55,7 +55,7 @@ TechCampus Solutions reported three persistent network problems: delayed respons
 ## Repository Structure
 
 ```
-Group4_TNN4113/
+Group16_TNN4113/
 │
 ├── README.md                          ← this file
 │
@@ -230,25 +230,25 @@ EOF
 ## Submission Package
 
 ```bash
-mkdir -p ~/Group4_Submission/{source_code,trace_outputs,plots,screenshots}
+mkdir -p ~/Group16_Submission/{source_code,trace_outputs,plots,screenshots}
 
-cp src/*.cc                              ~/Group4_Submission/source_code/
-cp results/task1_results.csv            ~/Group4_Submission/trace_outputs/
-cp results/task2_csma.xml               ~/Group4_Submission/trace_outputs/
-cp results/cwnd-newreno.dat             ~/Group4_Submission/trace_outputs/
-cp results/cwnd-cubic.dat               ~/Group4_Submission/trace_outputs/
-cp results/figure_5_2.png               ~/Group4_Submission/plots/
-cp results/figure_6_2.png               ~/Group4_Submission/plots/
-cp results/cwnd_comparison.png          ~/Group4_Submission/plots/
-cp screenshots/*.png                    ~/Group4_Submission/screenshots/
-cp report/TNN4113_Project_Report.docx   ~/Group4_Submission/
-cp report/TNN4113_Project_Report.pdf    ~/Group4_Submission/
+cp src/*.cc                              ~/Group16_Submission/source_code/
+cp results/task1_results.csv            ~/Group16_Submission/trace_outputs/
+cp results/task2_csma.xml               ~/Group16_Submission/trace_outputs/
+cp results/cwnd-newreno.dat             ~/Group16_Submission/trace_outputs/
+cp results/cwnd-cubic.dat               ~/Group16_Submission/trace_outputs/
+cp results/figure_5_2.png               ~/Group16_Submission/plots/
+cp results/figure_6_2.png               ~/Group16_Submission/plots/
+cp results/cwnd_comparison.png          ~/Group16_Submission/plots/
+cp screenshots/*.png                    ~/Group16_Submission/screenshots/
+cp report/TNN4113_Project_Report.docx   ~/Group16_Submission/
+cp report/TNN4113_Project_Report.pdf    ~/Group16_Submission/
 
 cd ~
-zip -r Group4_TNN4113_Submission.zip Group4_Submission/
+zip -r Group4_TNN4113_Submission.zip Group16_Submission/
 ```
 
-Upload `Group4_TNN4113_Submission.zip` to eLeap before **21 May 2026**.
+Upload `Group16_TNN4113_Submission.zip` to eLeap before **21 May 2026**.
 
 ---
 
