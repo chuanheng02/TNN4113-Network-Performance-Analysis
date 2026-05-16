@@ -251,13 +251,15 @@ All 4 members must run these checks and confirm outputs match before doing anyth
 
 ```bash
 cd ~/ns-allinone-3.43/ns-3.43
-./ns3 --version
+./ns3 show version
 ```
 
 Expected:
 ```
 ns-3.43
 ```
+
+> Note: `--version` flag does not exist in ns-3.43. Use `./ns3 show version` instead. You can also just confirm by running `pwd` — if you are inside `ns-allinone-3.43/ns-3.43/` you are on the correct version.
 
 ### 6.2 Run hello-simulator
 
@@ -1295,7 +1297,7 @@ Abort with Ctrl+C and run that combination manually:
 
 ```bash
 # Everyone — verify NS-3.43
-cd ~/ns-allinone-3.43/ns-3.43 && ./ns3 --version
+cd ~/ns-allinone-3.43/ns-3.43 && ./ns3 show version
 
 # Brendan (S1) — single test run
 ./ns3 run "scratch/task1_p2p --delay=10ms --errRate=0.00"
