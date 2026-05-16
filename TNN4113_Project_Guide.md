@@ -75,7 +75,7 @@ This is taken **directly from your project report template (Section 4.1 — Meth
 You do not need GitHub. Create one shared Google Drive folder and use this structure:
 
 ```
-Group4_TNN4113/
+Group16_TNN4113/
 ├── src/
 │   ├── task1_p2p.cc          ← Student 1 uploads here
 │   ├── task2_csma.cc          ← Student 2 uploads here
@@ -1089,22 +1089,22 @@ Fill in real names and adjust contribution percentages if the workload was uneve
 ### 11.6 Assemble submission package
 
 ```bash
-mkdir -p ~/Group4_Submission/source_code
-mkdir -p ~/Group4_Submission/trace_outputs
-mkdir -p ~/Group4_Submission/plots
-mkdir -p ~/Group4_Submission/screenshots
+mkdir -p ~/Group16_Submission/source_code
+mkdir -p ~/Group16_Submission/trace_outputs
+mkdir -p ~/Group16_Submission/plots
+mkdir -p ~/Group16_Submission/screenshots
 
-cp task1_p2p.cc task2_csma.cc task3_dumbbell.cc  ~/Group4_Submission/source_code/
-cp task1_results.csv task2_csma.xml               ~/Group4_Submission/trace_outputs/
-cp cwnd-newreno.dat cwnd-cubic.dat                ~/Group4_Submission/trace_outputs/
-cp figure_5_2.png figure_6_2.png cwnd_comparison.png ~/Group4_Submission/plots/
+cp task1_p2p.cc task2_csma.cc task3_dumbbell.cc  ~/Group16_Submission/source_code/
+cp task1_results.csv task2_csma.xml               ~/Group16_Submission/trace_outputs/
+cp cwnd-newreno.dat cwnd-cubic.dat                ~/Group16_Submission/trace_outputs/
+cp figure_5_2.png figure_6_2.png cwnd_comparison.png ~/Group16_Submission/plots/
 cp 5.1_task1_run.png 6.1_netanim.png \
-   6.2_task2_terminal.png 7.1_task3_run.png       ~/Group4_Submission/screenshots/
-cp TNN4113_Project_Report.docx                    ~/Group4_Submission/
-cp TNN4113_Project_Report.pdf                     ~/Group4_Submission/
+   6.2_task2_terminal.png 7.1_task3_run.png       ~/Group16_Submission/screenshots/
+cp TNN4113_Project_Report.docx                    ~/Group16_Submission/
+cp TNN4113_Project_Report.pdf                     ~/Group16_Submission/
 
 cd ~
-zip -r Group4_TNN4113_Submission.zip Group4_Submission/
+zip -r Group16_TNN4113_Submission.zip Group4_Submission/
 ```
 
 ---
